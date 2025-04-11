@@ -1,36 +1,32 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma/client";
 
-export const criarUsuario = async (req: Request, res: Response) => {
+export async function criarUsuario(req: Request, res: Response): Promise<void> {
   const { nome, email, senha, role } = req.body;
 
   try {
     const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
 
     if (usuarioExistente) {
-      return res.status(400).json({ erro: "Usuário já existe." });
+      res.status(400).json({ erro: "Usuário já existe." });
+      return;
     }
 
     const novoUsuario = await prisma.usuario.create({
-      data: {
-        nome,
-        email,
-        senha,
-        role
-      }
+      data: { nome, email, senha, role }
     });
 
-    return res.status(201).json(novoUsuario);
+    res.status(201).json(novoUsuario);
   } catch (error) {
-    return res.status(500).json({ erro: "Erro ao criar usuário." });
+    res.status(500).json({ erro: "Erro ao criar usuário." });
   }
-};
+}
 
-export const listarUsuarios = async (req: Request, res: Response) => {
+export async function listarUsuarios(req: Request, res: Response): Promise<void> {
   try {
     const usuarios = await prisma.usuario.findMany();
-    return res.json(usuarios);
+    res.json(usuarios);
   } catch (error) {
-    return res.status(500).json({ erro: "Erro ao listar usuários." });
+    res.status(500).json({ erro: "Erro ao listar usuários." });
   }
-};
+}
