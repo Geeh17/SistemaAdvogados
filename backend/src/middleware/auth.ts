@@ -5,11 +5,12 @@ interface JwtPayload {
   id: number;
 }
 
-export const autenticar = (req: Request, res: Response, next: NextFunction) => {
+export const autenticar = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ erro: "Token não fornecido" });
+    res.status(401).json({ erro: "Token não fornecido" });
+    return;
   }
 
   const token = authHeader.split(" ")[1];
@@ -19,6 +20,7 @@ export const autenticar = (req: Request, res: Response, next: NextFunction) => {
     req.usuarioId = decoded.id;
     next();
   } catch (error) {
-    return res.status(401).json({ erro: "Token inválido" });
+    res.status(401).json({ erro: "Token inválido" });
+    return;
   }
 };
