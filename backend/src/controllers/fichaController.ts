@@ -1,3 +1,4 @@
+
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
@@ -13,8 +14,10 @@ export const criarFicha = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    const usuario = await prisma.usuario.findUnique({ where: { id: req.usuarioId } });
+
     const cliente = await prisma.cliente.findFirst({
-      where: { id: clienteId, usuarioId: req.usuarioId },
+      where: usuario?.role === "MASTER" ? { id: clienteId } : { id: clienteId, usuarioId: req.usuarioId }
     });
 
     if (!cliente) {
@@ -30,10 +33,8 @@ export const criarFicha = async (req: Request, res: Response): Promise<void> => 
     });
 
     res.status(201).json(ficha);
-    return;
   } catch (error) {
     res.status(500).json({ erro: "Erro ao criar ficha", detalhes: error });
-    return;
   }
 };
 
@@ -46,8 +47,10 @@ export const listarFichasDoCliente = async (req: Request, res: Response): Promis
       return;
     }
 
+    const usuario = await prisma.usuario.findUnique({ where: { id: req.usuarioId } });
+
     const cliente = await prisma.cliente.findFirst({
-      where: { id: clienteId, usuarioId: req.usuarioId },
+      where: usuario?.role === "MASTER" ? { id: clienteId } : { id: clienteId, usuarioId: req.usuarioId }
     });
 
     if (!cliente) {
@@ -61,9 +64,7 @@ export const listarFichasDoCliente = async (req: Request, res: Response): Promis
     });
 
     res.json(fichas);
-    return;
   } catch (error) {
     res.status(500).json({ erro: "Erro ao listar fichas", detalhes: error });
-    return;
   }
 };
