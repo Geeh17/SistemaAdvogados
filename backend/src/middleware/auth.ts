@@ -1,11 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 interface JwtPayload {
   id: number;
 }
 
-export const autenticar = (req: Request, res: Response, next: NextFunction): void => {
+export const autenticar = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -17,7 +24,19 @@ export const autenticar = (req: Request, res: Response, next: NextFunction): voi
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "segredo") as JwtPayload;
-    req.usuarioId = decoded.id;
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!usuario) {
+      res.status(401).json({ erro: "Usuário não encontrado" });
+      return;
+    }
+
+    req.usuario = usuario;
+    req.usuarioId = usuario.id;
+
     next();
   } catch (error) {
     res.status(401).json({ erro: "Token inválido" });
