@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 
 interface JwtPayload {
   id: number;
+  role: string;
 }
 
 export const autenticar = async (
@@ -40,6 +41,5 @@ export const autenticar = async (
     next();
   } catch (error) {
     res.status(401).json({ erro: "Token inválido" });
-    return;
   }
 };
