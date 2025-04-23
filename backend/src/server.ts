@@ -11,6 +11,7 @@ import authRoutes from "./routes/auth";
 const app = express();
 app.use(express.json());
 
+
 app.use(authRoutes); 
 
 // Rotas protegidas
