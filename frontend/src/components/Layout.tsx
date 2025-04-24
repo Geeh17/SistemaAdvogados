@@ -14,7 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <aside className="w-64 bg-blue-800 text-white p-6 space-y-6 flex flex-col">
         <h2 className="text-2xl font-bold">Menu</h2>
         <nav className="flex flex-col space-y-2">
-          <Link href="/home" className="hover:bg-blue-700 p-2 rounded">Dashboard</Link>
+          <Link href="/dashboard" className="hover:bg-blue-700 p-2 rounded">Dashboard</Link>
           <Link href="/clientes" className="hover:bg-blue-700 p-2 rounded">Clientes</Link>
           <Link href="/fichas" className="hover:bg-blue-700 p-2 rounded">Fichas</Link>
           <Link href="/configuracoes" className="hover:bg-blue-700 p-2 rounded">Configurações</Link>

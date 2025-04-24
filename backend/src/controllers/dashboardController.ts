@@ -16,13 +16,15 @@ export async function getDashboard(req: Request, res: Response) {
       LIMIT 6
     `);
 
+    const parsedFichasPorMes = fichasPorMes.map((item) => ({
+      mes: Number(item.mes),
+      total: Number(item.total),
+    }));
+
     res.json({
       totalClientes: Number(totalClientes),
       totalFichas: Number(totalFichas),
-      fichasPorMes: fichasPorMes.map((item) => ({
-        mes: item.mes,
-        total: Number(item.total),
-      })),
+      fichasPorMes: parsedFichasPorMes,
     });
   } catch (error) {
     console.error("Erro no dashboard:", error);
