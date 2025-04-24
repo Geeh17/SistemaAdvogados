@@ -16,7 +16,14 @@ export async function getDashboard(req: Request, res: Response) {
       LIMIT 6
     `);
 
-    res.json({ totalClientes, totalFichas, fichasPorMes });
+    res.json({
+      totalClientes: Number(totalClientes),
+      totalFichas: Number(totalFichas),
+      fichasPorMes: fichasPorMes.map((item) => ({
+        mes: item.mes,
+        total: Number(item.total),
+      })),
+    });
   } catch (error) {
     console.error("Erro no dashboard:", error);
     res.status(500).json({ message: 'Erro ao carregar dashboard', error });
