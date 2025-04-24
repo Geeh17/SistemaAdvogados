@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv"; 
+import cors from "cors"; // ✅ Importa o pacote CORS
 dotenv.config(); 
 
 import usuarioRoutes from "./routes/usuarios";
@@ -9,8 +10,13 @@ import dashboardRoutes from "./routes/dashboard";
 import authRoutes from "./routes/auth"; 
 
 const app = express();
-app.use(express.json());
 
+// ✅ Habilita CORS para permitir o front (localhost:5173)
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
+
+app.use(express.json());
 
 app.use(authRoutes); 
 
