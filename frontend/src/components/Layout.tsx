@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import axios from '@/services/api';
 import {
   Home,
   LayoutDashboard,
@@ -9,8 +11,28 @@ import {
   LogOut
 } from 'lucide-react';
 
+interface Usuario {
+  nome: string;
+  email: string;
+  role: string;
+}
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+
+  useEffect(() => {
+    async function carregarUsuario() {
+      try {
+        const res = await axios.get("usuarios/usuario");
+        setUsuario(res.data);
+      } catch (error) {
+        console.error("Erro ao carregar usuário", error);
+      }
+    }
+
+    carregarUsuario();
+  }, []);
 
   function handleLogout() {
     localStorage.removeItem("token");
@@ -28,6 +50,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <span className="text-sm">Início</span>
         </button>
 
+        {usuario && (
+          <div className="text-sm border-b border-blue-700 pb-4 mb-4">
+            <p className="font-medium">{usuario.nome}</p>
+            <p className="text-blue-200 text-xs">{usuario.email}</p>
+            <p className="text-blue-300 italic text-xs">{usuario.role}</p>
+          </div>
+        )}
 
         <nav className="flex flex-col space-y-2">
           <Link href="/dashboard" className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded">

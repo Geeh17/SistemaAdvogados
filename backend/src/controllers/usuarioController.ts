@@ -33,3 +33,31 @@ export async function listarUsuarios(req: Request, res: Response): Promise<void>
     res.status(500).json({ erro: "Erro ao listar usuários.", detalhes: error });
   }
 }
+
+export async function obterUsuario(req: Request, res: Response): Promise<void> {
+  try {
+    if (!req.usuarioId) {
+      res.status(401).json({ erro: "Usuário não autenticado." });
+      return;
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuarioId },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        role: true
+      }
+    });
+
+    if (!usuario) {
+      res.status(404).json({ erro: "Usuário não encontrado." });
+      return;
+    }
+
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ erro: "Erro ao obter usuário.", detalhes: error });
+  }
+}

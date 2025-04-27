@@ -1,4 +1,3 @@
-// Componente reutilizável de modal para cadastro/edição de cliente
 import { useEffect, useState } from "react";
 import InputMask from "react-input-mask";
 
