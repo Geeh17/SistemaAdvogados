@@ -1,8 +1,11 @@
+// Página de Clientes com melhorias: modal separado, busca, ícones, confirmação e feedback
 import { useEffect, useState } from "react";
 import axios from "@/services/api";
 import Layout from "@/components/Layout";
 import PrivateRoute from "@/components/PrivateRoute";
 import { formatCPF, formatTelefone } from "@/utils/formatters";
+import { Pencil, Trash2 } from "lucide-react";
+import ModalCliente from "@/components/ModalCliente";
 
 interface Cliente {
   id: number;
@@ -14,10 +17,7 @@ interface Cliente {
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [nome, setNome] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [endereco, setEndereco] = useState("");
+  const [busca, setBusca] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
 
@@ -29,10 +29,7 @@ export default function ClientesPage() {
     axios.get("/clientes").then((res) => setClientes(res.data));
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const data = { nome, cpf, telefone, endereco };
-
+  function handleSubmit(data: Omit<Cliente, "id">) {
     if (editingCliente) {
       axios.put(`/clientes/${editingCliente.id}`, data).then(() => {
         closeModal();
@@ -46,31 +43,28 @@ export default function ClientesPage() {
     }
   }
 
-  function openModal(cliente?: Cliente) {
-    if (cliente) {
-      setEditingCliente(cliente);
-      setNome(cliente.nome);
-      setCpf(cliente.cpf);
-      setTelefone(cliente.telefone);
-      setEndereco(cliente.endereco);
-    } else {
-      setEditingCliente(null);
-      setNome("");
-      setCpf("");
-      setTelefone("");
-      setEndereco("");
+  function handleDelete(clienteId: number) {
+    if (confirm("Tem certeza que deseja excluir este cliente?")) {
+      axios.delete(`/clientes/${clienteId}`).then(() => fetchClientes());
     }
+  }
+
+  function openModal(cliente?: Cliente) {
+    if (cliente) setEditingCliente(cliente);
+    else setEditingCliente(null);
     setShowModal(true);
   }
 
   function closeModal() {
     setShowModal(false);
     setEditingCliente(null);
-    setNome("");
-    setCpf("");
-    setTelefone("");
-    setEndereco("");
   }
+
+  const clientesFiltrados = clientes.filter(c =>
+    c.nome.toLowerCase().includes(busca.toLowerCase()) ||
+    c.cpf.includes(busca) ||
+    c.telefone.includes(busca)
+  );
 
   return (
     <PrivateRoute>
@@ -85,6 +79,14 @@ export default function ClientesPage() {
           </button>
         </div>
 
+        <input
+          type="text"
+          placeholder="Buscar cliente..."
+          className="mb-4 p-2 border border-gray-300 rounded w-full max-w-md"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
+
         <div className="bg-white shadow rounded-lg overflow-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-gray-100 text-gray-700">
@@ -97,20 +99,27 @@ export default function ClientesPage() {
               </tr>
             </thead>
             <tbody>
-              {clientes.map((cliente) => (
+              {clientesFiltrados.map((cliente) => (
                 <tr key={cliente.id} className="border-b">
                   <td className="px-6 py-4 text-sm text-gray-800">{cliente.nome}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{formatCPF(cliente.cpf)}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{formatTelefone(cliente.telefone)}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{cliente.endereco}</td>
-                  <td className="px-6 py-4 text-sm text-right">
+                  <td className="px-6 py-4 text-sm text-right space-x-2">
                     <button
                       onClick={() => openModal(cliente)}
-                      className="text-blue-600 hover:underline mr-3"
+                      className="text-blue-600 hover:text-blue-800"
+                      aria-label="Editar cliente"
                     >
-                      Editar
+                      <Pencil className="w-4 h-4 inline" />
                     </button>
-                    <button className="text-red-600 hover:underline">Excluir</button>
+                    <button
+                      onClick={() => handleDelete(cliente.id)}
+                      className="text-red-600 hover:text-red-800"
+                      aria-label="Excluir cliente"
+                    >
+                      <Trash2 className="w-4 h-4 inline" />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -119,62 +128,12 @@ export default function ClientesPage() {
         </div>
 
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg">
-              <h2 className="text-lg font-semibold mb-4">
-                {editingCliente ? "Editar Cliente" : "Cadastrar Cliente"}
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Nome"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="CPF"
-                  value={cpf}
-                  onChange={(e) => setCpf(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Telefone"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Endereço"
-                  value={endereco}
-                  onChange={(e) => setEndereco(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-                <div className="flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="px-4 py-2 bg-gray-200 rounded"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    Salvar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+          <ModalCliente
+            isOpen={showModal}
+            onClose={closeModal}
+            onSubmit={handleSubmit}
+            cliente={editingCliente}
+          />
         )}
       </Layout>
     </PrivateRoute>
