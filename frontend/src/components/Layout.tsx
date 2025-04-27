@@ -43,7 +43,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-gray-100">
       <aside className="w-64 bg-blue-800 text-white p-6 space-y-6 flex flex-col">
         <button
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/home")}
           className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
         >
           <Home className="w-5 h-5" />

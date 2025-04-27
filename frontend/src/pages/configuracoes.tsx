@@ -25,7 +25,6 @@ export default function ConfiguracoesPage() {
     async function carregarDados() {
       try {
         const res = await axios.get("/usuario");
-        console.log("Usuário logado:", res.data); // 👀 debug
         setUsuario(res.data);
         setNome(res.data.nome);
         setEmail(res.data.email);

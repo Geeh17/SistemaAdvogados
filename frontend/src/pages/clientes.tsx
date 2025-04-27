@@ -1,4 +1,3 @@
-// Página de Clientes com melhorias: modal separado, busca, ícones, confirmação e feedback
 import { useEffect, useState } from "react";
 import axios from "@/services/api";
 import Layout from "@/components/Layout";
