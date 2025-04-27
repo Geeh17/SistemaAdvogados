@@ -1,0 +1,218 @@
+import { useEffect, useState } from "react";
+import axios from "@/services/api";
+import Layout from "@/components/Layout";
+import PrivateRoute from "@/components/PrivateRoute";
+import { CalendarDays, FileDown } from "lucide-react";
+
+interface Cliente {
+  id: number;
+  nome: string;
+}
+
+interface Ficha {
+  id: number;
+  descricao: string;
+  data: string;
+}
+
+export default function FichasPage() {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clienteSelecionado, setClienteSelecionado] = useState<number | null>(null);
+  const [fichas, setFichas] = useState<Ficha[]>([]);
+  const [descricao, setDescricao] = useState("");
+
+  const [filtroDescricao, setFiltroDescricao] = useState("");
+  const [filtroAno, setFiltroAno] = useState("");
+  const [filtroMes, setFiltroMes] = useState("");
+
+  const [buscaNome, setBuscaNome] = useState("");
+  const [sugestoes, setSugestoes] = useState<Cliente[]>([]);
+
+  useEffect(() => {
+    axios.get("/clientes").then((res) => setClientes(res.data));
+  }, []);
+
+  useEffect(() => {
+    if (clienteSelecionado) {
+      axios.get(`/fichas/${clienteSelecionado}`).then((res) => setFichas(res.data));
+    } else {
+      setFichas([]);
+    }
+  }, [clienteSelecionado]);
+
+  useEffect(() => {
+    if (buscaNome.trim() === "") {
+      setSugestoes([]);
+    } else {
+      const termo = buscaNome.toLowerCase();
+      const filtrados = clientes.filter((c) =>
+        c.nome.toLowerCase().includes(termo)
+      );
+      setSugestoes(filtrados);
+    }
+  }, [buscaNome, clientes]);
+
+  function selecionarCliente(id: number, nome: string) {
+    setClienteSelecionado(id);
+    setBuscaNome(nome);
+    setSugestoes([]);
+  }
+
+  async function criarFicha(e: React.FormEvent) {
+    e.preventDefault();
+    if (!clienteSelecionado || !descricao.trim()) return;
+
+    try {
+      const res = await axios.post(`/fichas/${clienteSelecionado}`, { descricao });
+      setFichas((prev) => [res.data, ...prev]);
+      setDescricao("");
+    } catch (err) {
+      console.error("Erro ao criar ficha", err);
+    }
+  }
+
+  async function baixarPdf(fichaId: number) {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`http://localhost:3000/fichas/${fichaId}/pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `ficha-${fichaId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Erro ao baixar PDF", err);
+    }
+  }
+
+  const fichasFiltradas = fichas.filter((ficha) => {
+    const dataFicha = new Date(ficha.data);
+    const correspondeDescricao = ficha.descricao.toLowerCase().includes(filtroDescricao.toLowerCase());
+    const correspondeAno = filtroAno ? dataFicha.getFullYear().toString() === filtroAno : true;
+    const correspondeMes = filtroMes ? (dataFicha.getMonth() + 1).toString().padStart(2, "0") === filtroMes : true;
+    return correspondeDescricao && correspondeAno && correspondeMes;
+  });
+
+  return (
+    <PrivateRoute>
+      <Layout>
+        <div className="max-w-5xl mx-auto py-10">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">Fichas Jurídicas</h1>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Buscar cliente</label>
+            <input
+              type="text"
+              value={buscaNome}
+              onChange={(e) => setBuscaNome(e.target.value)}
+              placeholder="Digite o nome do cliente..."
+              className="w-full p-2 border border-gray-300 rounded-lg"
+            />
+            {sugestoes.length > 0 && (
+              <ul className="border border-gray-200 rounded-lg mt-1 max-h-40 overflow-y-auto bg-white shadow z-10 relative">
+                {sugestoes.map((cliente) => (
+                  <li
+                    key={cliente.id}
+                    onClick={() => selecionarCliente(cliente.id, cliente.nome)}
+                    className="p-2 hover:bg-blue-50 cursor-pointer"
+                  >
+                    {cliente.nome}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {!clienteSelecionado ? (
+            <p className="text-gray-600 italic">Favor buscar e selecionar um cliente para ver seu histórico.</p>
+          ) : (
+            <>
+              <p className="text-sm text-gray-700 mb-4">
+                Total de fichas: <span className="font-semibold">{fichasFiltradas.length}</span>
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <input
+                  type="text"
+                  placeholder="Buscar por descrição..."
+                  value={filtroDescricao}
+                  onChange={(e) => setFiltroDescricao(e.target.value)}
+                  className="p-2 border border-gray-300 rounded-lg"
+                />
+                <input
+                  type="number"
+                  placeholder="Ano (ex: 2024)"
+                  value={filtroAno}
+                  onChange={(e) => setFiltroAno(e.target.value)}
+                  className="p-2 border border-gray-300 rounded-lg"
+                />
+                <input
+                  type="number"
+                  placeholder="Mês (ex: 04)"
+                  value={filtroMes}
+                  onChange={(e) => setFiltroMes(e.target.value)}
+                  className="p-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              <form onSubmit={criarFicha} className="mb-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Descrição da ficha</label>
+                  <textarea
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                    rows={4}
+                    placeholder="Descreva o atendimento"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  Criar Ficha
+                </button>
+              </form>
+
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Fichas encontradas</h2>
+                {fichasFiltradas.length === 0 ? (
+                  <p className="text-gray-500">Nenhuma ficha encontrada.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {fichasFiltradas.map((ficha) => (
+                      <li
+                        key={ficha.id}
+                        className="bg-white p-4 rounded-lg shadow flex justify-between items-center"
+                      >
+                        <div>
+                          <p className="font-medium">{ficha.descricao}</p>
+                          <span className="text-sm text-gray-500 flex items-center gap-1">
+                            <CalendarDays className="w-4 h-4" />
+                            {new Date(ficha.data).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => baixarPdf(ficha.id)}
+                          className="text-blue-600 hover:underline text-sm flex items-center gap-1"
+                        >
+                          <FileDown className="w-4 h-4" /> PDF
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </Layout>
+    </PrivateRoute>
+  );
+}
