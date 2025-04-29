@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "@/services/api";
 import Layout from "@/components/Layout";
 import PrivateRoute from "@/components/PrivateRoute";
 
 interface Usuario {
+  id: number;
   nome: string;
   email: string;
   role: string;
@@ -11,45 +12,58 @@ interface Usuario {
 
 export default function ConfiguracoesPage() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]); // << lista de usuários
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
 
-  // Exclusivo para cadastro de novos usuários
   const [novoNome, setNovoNome] = useState("");
   const [novoEmail, setNovoEmail] = useState("");
   const [novaSenhaUsuario, setNovaSenhaUsuario] = useState("");
 
   useEffect(() => {
-    async function carregarDados() {
+    async function carregarPerfil() {
       try {
-        const res = await axios.get("/usuario");
+        const res = await axios.get("/usuarios/perfil");
         setUsuario(res.data);
         setNome(res.data.nome);
         setEmail(res.data.email);
+
+        if (res.data.role === "MASTER") {
+          carregarUsuarios(); // se MASTER, carrega também todos os usuários
+        }
       } catch (error) {
-        console.error("Erro ao carregar dados do usuário", error);
+        console.error("Erro ao carregar perfil", error);
       }
     }
 
-    carregarDados();
+    carregarPerfil();
   }, []);
+
+  async function carregarUsuarios() {
+    try {
+      const res = await axios.get("/usuarios");
+      setUsuarios(res.data);
+    } catch (error) {
+      console.error("Erro ao carregar usuários", error);
+    }
+  }
 
   async function atualizarPerfil(e: React.FormEvent) {
     e.preventDefault();
     try {
-      await axios.put("/usuario", {
+      await axios.put("/usuarios/perfil", {
         nome,
         email,
         senhaAtual,
         novaSenha,
       });
-      alert("Dados atualizados com sucesso!");
+      alert("Perfil atualizado com sucesso!");
       setSenhaAtual("");
       setNovaSenha("");
     } catch (error) {
-      alert("Erro ao atualizar dados");
+      alert("Erro ao atualizar perfil");
       console.error(error);
     }
   }
@@ -61,13 +75,26 @@ export default function ConfiguracoesPage() {
         nome: novoNome,
         email: novoEmail,
         senha: novaSenhaUsuario,
+        role: "ADVOGADO", // novo usuário sempre será ADVOGADO
       });
       alert("Novo usuário cadastrado com sucesso!");
       setNovoNome("");
       setNovoEmail("");
       setNovaSenhaUsuario("");
+      carregarUsuarios(); // recarrega lista
     } catch (error) {
       alert("Erro ao cadastrar usuário");
+      console.error(error);
+    }
+  }
+
+  async function alterarRole(id: number, novoRole: string) {
+    try {
+      await axios.put(`/usuarios/${id}`, { role: novoRole });
+      alert("Role atualizado com sucesso!");
+      carregarUsuarios(); // recarrega lista
+    } catch (error) {
+      alert("Erro ao atualizar role");
       console.error(error);
     }
   }
@@ -75,11 +102,12 @@ export default function ConfiguracoesPage() {
   return (
     <PrivateRoute>
       <Layout>
-        <div className="max-w-5xl mx-auto py-10">
+        <div className="max-w-6xl mx-auto py-10">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">
             Configurações da Conta
           </h1>
 
+          {/* Atualizar perfil */}
           <form onSubmit={atualizarPerfil} className="space-y-5 mb-10">
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -133,49 +161,80 @@ export default function ConfiguracoesPage() {
             </button>
           </form>
 
-          {usuario && usuario.role?.toUpperCase() === "MASTER" && (
-            <div className="bg-gray-100 p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Painel Administrativo (MASTER)
-              </h2>
-
-              <form onSubmit={cadastrarNovoUsuario} className="space-y-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-700 mb-2">
+          {/* Apenas para usuários MASTER */}
+          {usuario?.role === "MASTER" && (
+            <div className="bg-gray-100 p-6 rounded-lg shadow-md space-y-10">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
                   Cadastrar novo usuário
-                </h3>
-                <input
-                  type="text"
-                  placeholder="Nome"
-                  value={novoNome}
-                  onChange={(e) => setNovoNome(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                />
-                <input
-                  type="email"
-                  placeholder="E-mail"
-                  value={novoEmail}
-                  onChange={(e) => setNovoEmail(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                />
-                <input
-                  type="password"
-                  placeholder="Senha"
-                  value={novaSenhaUsuario}
-                  onChange={(e) => setNovaSenhaUsuario(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                />
-                <button
-                  type="submit"
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                >
-                  Cadastrar usuário
-                </button>
-              </form>
+                </h2>
 
-              <p className="text-gray-600 italic">
-                🔧 Seções adicionais como produtividade, acessos e histórico
-                virão aqui.
-              </p>
+                <form onSubmit={cadastrarNovoUsuario} className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Nome"
+                    value={novoNome}
+                    onChange={(e) => setNovoNome(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                  />
+                  <input
+                    type="email"
+                    placeholder="E-mail"
+                    value={novoEmail}
+                    onChange={(e) => setNovoEmail(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Senha"
+                    value={novaSenhaUsuario}
+                    onChange={(e) => setNovaSenhaUsuario(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                  >
+                    Cadastrar usuário
+                  </button>
+                </form>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Usuários cadastrados
+                </h2>
+
+                <table className="w-full bg-white rounded-lg shadow-md overflow-hidden">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="text-left p-3">Nome</th>
+                      <th className="text-left p-3">E-mail</th>
+                      <th className="text-left p-3">Role</th>
+                      <th className="text-center p-3">Alterar Role</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usuarios.map((u) => (
+                      <tr key={u.id} className="border-b">
+                        <td className="p-3">{u.nome}</td>
+                        <td className="p-3">{u.email}</td>
+                        <td className="p-3">{u.role}</td>
+                        <td className="p-3 text-center">
+                          <select
+                            value={u.role}
+                            onChange={(e) => alterarRole(u.id, e.target.value)}
+                            className="p-2 border rounded-md"
+                          >
+                            <option value="MASTER">MASTER</option>
+                            <option value="ADVOGADO">ADVOGADO</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

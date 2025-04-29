@@ -2,16 +2,25 @@ import { Router } from "express";
 import {
   criarUsuario,
   listarUsuarios,
-  obterUsuario
+  obterUsuarioPorId,
+  atualizarUsuarioPorId,
+  deletarUsuario,
+  obterUsuario,
+  atualizarUsuario,
 } from "../controllers/usuarioController";
-import { authorize } from "../middleware/authorize";
+
 import { autenticar } from "../middleware/auth";
+import { authorize } from "../middleware/authorize";
 
 const router = Router();
 
-router.get("/usuario", autenticar, obterUsuario);
-router.post("/", criarUsuario);
-router.get("/", listarUsuarios);
-router.get("/usuarios", autenticar, authorize("MASTER"), listarUsuarios);
+router.get("/perfil", autenticar, obterUsuario);
+router.put("/perfil", autenticar, atualizarUsuario);
+
+router.post("/", autenticar, authorize("MASTER"), criarUsuario);
+router.get("/", autenticar, authorize("MASTER"), listarUsuarios);
+router.get("/:id", autenticar, authorize("MASTER"), obterUsuarioPorId);
+router.put("/:id", autenticar, authorize("MASTER"), atualizarUsuarioPorId);
+router.delete("/:id", autenticar, authorize("MASTER"), deletarUsuario);
 
 export default router;

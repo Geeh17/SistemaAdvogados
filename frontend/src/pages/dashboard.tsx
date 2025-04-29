@@ -3,6 +3,8 @@ import axios from "@/services/api";
 import Layout from "@/components/Layout";
 import PrivateRoute from "@/components/PrivateRoute";
 import { Users, ClipboardList, CalendarDays } from "lucide-react";
+import BarChartComponent from "@/components/BarChart";
+import PieChartComponent from "@/components/PieChart";
 
 interface DashboardData {
   totalClientes: number;
@@ -10,11 +12,33 @@ interface DashboardData {
   fichasPorMes: { mes: number; total: number }[];
 }
 
+interface ClientesPorMesData {
+  mes: number;
+  total: number;
+}
+
+interface RankingAdvogadosData {
+  nome: string;
+  total: number;
+}
+
 export default function HomePage() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [clientesPorMes, setClientesPorMes] = useState<ClientesPorMesData[]>(
+    []
+  );
+  const [rankingAdvogados, setRankingAdvogados] = useState<
+    RankingAdvogadosData[]
+  >([]);
 
   useEffect(() => {
     axios.get("/dashboard").then((res) => setDashboard(res.data));
+    axios
+      .get("/dashboard/clientes-por-mes")
+      .then((res) => setClientesPorMes(res.data));
+    axios
+      .get("/dashboard/ranking-advogados")
+      .then((res) => setRankingAdvogados(res.data));
   }, []);
 
   return (
@@ -41,6 +65,23 @@ export default function HomePage() {
             icon={<CalendarDays className="w-6 h-6 text-white" />}
           />
         </div>
+
+        {/* Gráficos */}
+        {dashboard?.fichasPorMes && (
+          <BarChartComponent
+            data={dashboard.fichasPorMes}
+            titulo="Fichas Criadas por Mês"
+          />
+        )}
+        {clientesPorMes.length > 0 && (
+          <BarChartComponent
+            data={clientesPorMes}
+            titulo="Clientes Cadastrados por Mês"
+          />
+        )}
+        {rankingAdvogados.length > 0 && (
+          <PieChartComponent data={rankingAdvogados} />
+        )}
       </Layout>
     </PrivateRoute>
   );

@@ -24,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function carregarUsuario() {
       try {
-        const res = await axios.get("usuarios/usuario");
+        const res = await axios.get("/usuarios/perfil");
         setUsuario(res.data);
       } catch (error) {
         console.error("Erro ao carregar usuário", error);
@@ -80,13 +80,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <FileText className="w-5 h-5" />
             Fichas
           </Link>
-          <Link
-            href="/configuracoes"
-            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
-          >
-            <Settings className="w-5 h-5" />
-            Configurações
-          </Link>
+
+          {usuario?.role === "MASTER" && (
+            <Link
+              href="/configuracoes"
+              className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+            >
+              <Settings className="w-5 h-5" />
+              Cadastro de usuario
+            </Link>
+          )}
         </nav>
 
         <button
