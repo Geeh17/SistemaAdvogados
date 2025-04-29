@@ -59,10 +59,11 @@ export default function ClientesPage() {
     setEditingCliente(null);
   }
 
-  const clientesFiltrados = clientes.filter(c =>
-    c.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    c.cpf.includes(busca) ||
-    c.telefone.includes(busca)
+  const clientesFiltrados = clientes.filter(
+    (c) =>
+      c.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      c.cpf.includes(busca) ||
+      c.telefone.includes(busca)
   );
 
   return (
@@ -90,20 +91,36 @@ export default function ClientesPage() {
           <table className="min-w-full table-auto">
             <thead className="bg-gray-100 text-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium">Nome</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">
+                  Nome
+                </th>
                 <th className="px-6 py-3 text-left text-sm font-medium">CPF</th>
-                <th className="px-6 py-3 text-left text-sm font-medium">Telefone</th>
-                <th className="px-6 py-3 text-left text-sm font-medium">Endereço</th>
-                <th className="px-6 py-3 text-right text-sm font-medium">Ações</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">
+                  Telefone
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium">
+                  Endereço
+                </th>
+                <th className="px-6 py-3 text-right text-sm font-medium">
+                  Ações
+                </th>
               </tr>
             </thead>
             <tbody>
               {clientesFiltrados.map((cliente) => (
                 <tr key={cliente.id} className="border-b">
-                  <td className="px-6 py-4 text-sm text-gray-800">{cliente.nome}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{formatCPF(cliente.cpf)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{formatTelefone(cliente.telefone)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{cliente.endereco}</td>
+                  <td className="px-6 py-4 text-sm text-gray-800">
+                    {cliente.nome}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {formatCPF(cliente.cpf)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {formatTelefone(cliente.telefone)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {cliente.endereco}
+                  </td>
                   <td className="px-6 py-4 text-sm text-right space-x-2">
                     <button
                       onClick={() => openModal(cliente)}

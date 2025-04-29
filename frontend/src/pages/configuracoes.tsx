@@ -76,11 +76,15 @@ export default function ConfiguracoesPage() {
     <PrivateRoute>
       <Layout>
         <div className="max-w-5xl mx-auto py-10">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Configurações da Conta</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            Configurações da Conta
+          </h1>
 
           <form onSubmit={atualizarPerfil} className="space-y-5 mb-10">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Nome</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Nome
+              </label>
               <input
                 type="text"
                 value={nome}
@@ -89,7 +93,9 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">E-mail</label>
+              <label className="block text-sm font-medium text-gray-700">
+                E-mail
+              </label>
               <input
                 type="email"
                 value={email}
@@ -98,7 +104,9 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Senha atual</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Senha atual
+              </label>
               <input
                 type="password"
                 value={senhaAtual}
@@ -107,7 +115,9 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Nova senha</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Nova senha
+              </label>
               <input
                 type="password"
                 value={novaSenha}
@@ -125,10 +135,14 @@ export default function ConfiguracoesPage() {
 
           {usuario && usuario.role?.toUpperCase() === "MASTER" && (
             <div className="bg-gray-100 p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Painel Administrativo (MASTER)</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Painel Administrativo (MASTER)
+              </h2>
 
               <form onSubmit={cadastrarNovoUsuario} className="space-y-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-700 mb-2">Cadastrar novo usuário</h3>
+                <h3 className="text-lg font-medium text-gray-700 mb-2">
+                  Cadastrar novo usuário
+                </h3>
                 <input
                   type="text"
                   placeholder="Nome"
@@ -159,7 +173,8 @@ export default function ConfiguracoesPage() {
               </form>
 
               <p className="text-gray-600 italic">
-                🔧 Seções adicionais como produtividade, acessos e histórico virão aqui.
+                🔧 Seções adicionais como produtividade, acessos e histórico
+                virão aqui.
               </p>
             </div>
           )}

@@ -17,7 +17,9 @@ interface Ficha {
 
 export default function FichasPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [clienteSelecionado, setClienteSelecionado] = useState<number | null>(null);
+  const [clienteSelecionado, setClienteSelecionado] = useState<number | null>(
+    null
+  );
   const [fichas, setFichas] = useState<Ficha[]>([]);
   const [descricao, setDescricao] = useState("");
 
@@ -34,7 +36,9 @@ export default function FichasPage() {
 
   useEffect(() => {
     if (clienteSelecionado) {
-      axios.get(`/fichas/${clienteSelecionado}`).then((res) => setFichas(res.data));
+      axios
+        .get(`/fichas/${clienteSelecionado}`)
+        .then((res) => setFichas(res.data));
     } else {
       setFichas([]);
     }
@@ -63,7 +67,9 @@ export default function FichasPage() {
     if (!clienteSelecionado || !descricao.trim()) return;
 
     try {
-      const res = await axios.post(`/fichas/${clienteSelecionado}`, { descricao });
+      const res = await axios.post(`/fichas/${clienteSelecionado}`, {
+        descricao,
+      });
       setFichas((prev) => [res.data, ...prev]);
       setDescricao("");
     } catch (err) {
@@ -74,12 +80,17 @@ export default function FichasPage() {
   async function baixarPdf(fichaId: number) {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`http://localhost:3000/fichas/${fichaId}/pdf`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        `http://localhost:3000/fichas/${fichaId}/pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob",
+        }
+      );
 
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: "application/pdf" })
+      );
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `ficha-${fichaId}.pdf`);
@@ -93,9 +104,15 @@ export default function FichasPage() {
 
   const fichasFiltradas = fichas.filter((ficha) => {
     const dataFicha = new Date(ficha.data);
-    const correspondeDescricao = ficha.descricao.toLowerCase().includes(filtroDescricao.toLowerCase());
-    const correspondeAno = filtroAno ? dataFicha.getFullYear().toString() === filtroAno : true;
-    const correspondeMes = filtroMes ? (dataFicha.getMonth() + 1).toString().padStart(2, "0") === filtroMes : true;
+    const correspondeDescricao = ficha.descricao
+      .toLowerCase()
+      .includes(filtroDescricao.toLowerCase());
+    const correspondeAno = filtroAno
+      ? dataFicha.getFullYear().toString() === filtroAno
+      : true;
+    const correspondeMes = filtroMes
+      ? (dataFicha.getMonth() + 1).toString().padStart(2, "0") === filtroMes
+      : true;
     return correspondeDescricao && correspondeAno && correspondeMes;
   });
 
@@ -103,10 +120,14 @@ export default function FichasPage() {
     <PrivateRoute>
       <Layout>
         <div className="max-w-5xl mx-auto py-10">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Fichas Jurídicas</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            Fichas Jurídicas
+          </h1>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Buscar cliente</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Buscar cliente
+            </label>
             <input
               type="text"
               value={buscaNome}
@@ -130,11 +151,14 @@ export default function FichasPage() {
           </div>
 
           {!clienteSelecionado ? (
-            <p className="text-gray-600 italic">Favor buscar e selecionar um cliente para ver seu histórico.</p>
+            <p className="text-gray-600 italic">
+              Favor buscar e selecionar um cliente para ver seu histórico.
+            </p>
           ) : (
             <>
               <p className="text-sm text-gray-700 mb-4">
-                Total de fichas: <span className="font-semibold">{fichasFiltradas.length}</span>
+                Total de fichas:{" "}
+                <span className="font-semibold">{fichasFiltradas.length}</span>
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
@@ -163,7 +187,9 @@ export default function FichasPage() {
 
               <form onSubmit={criarFicha} className="mb-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Descrição da ficha</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Descrição da ficha
+                  </label>
                   <textarea
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
@@ -181,7 +207,9 @@ export default function FichasPage() {
               </form>
 
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Fichas encontradas</h2>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Fichas encontradas
+                </h2>
                 {fichasFiltradas.length === 0 ? (
                   <p className="text-gray-500">Nenhuma ficha encontrada.</p>
                 ) : (

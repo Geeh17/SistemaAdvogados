@@ -16,7 +16,12 @@ interface Props {
   cliente: Cliente | null;
 }
 
-export default function ModalCliente({ isOpen, onClose, onSubmit, cliente }: Props) {
+export default function ModalCliente({
+  isOpen,
+  onClose,
+  onSubmit,
+  cliente,
+}: Props) {
   const [nome, setNome] = useState("");
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");

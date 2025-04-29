@@ -2,7 +2,14 @@ import Layout from "@/components/Layout";
 import PrivateRoute from "@/components/PrivateRoute";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ptBR } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
@@ -12,7 +19,9 @@ registerLocale("pt-BR", ptBR);
 export default function HomePage() {
   const [totalClientes, setTotalClientes] = useState(0);
   const [totalFichas, setTotalFichas] = useState(0);
-  const [dataSelecionada, setDataSelecionada] = useState<Date | null>(new Date());
+  const [dataSelecionada, setDataSelecionada] = useState<Date | null>(
+    new Date()
+  );
 
   useEffect(() => {
     setTotalClientes(42);
@@ -37,26 +46,40 @@ export default function HomePage() {
     <PrivateRoute>
       <Layout>
         <div className="max-w-7xl mx-auto py-10 px-4">
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">
-            Bem-vindo ao Sistema de Advogados
+          <h1 className="text-4xl font-extrabold text-gray-800 mb-4">
+            Sistema de Gestão Jurídica Integrada
           </h1>
+          <p className="text-lg text-gray-600 mb-6">
+            Organize, acompanhe e otimize suas atividades jurídicas com
+            praticidade e eficiência.
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             <Link href="/clientes">
               <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition min-h-[130px] flex flex-col justify-between">
-                <h2 className="text-xl font-semibold text-blue-700">Clientes</h2>
-                <p className="text-gray-600 mt-2">Gerencie seus clientes cadastrados.</p>
+                <h2 className="text-xl font-semibold text-blue-700">
+                  Clientes
+                </h2>
+                <p className="text-gray-600 mt-2">
+                  Gerencie seus clientes cadastrados.
+                </p>
               </div>
             </Link>
             <Link href="/fichas">
               <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition min-h-[130px] flex flex-col justify-between">
                 <h2 className="text-xl font-semibold text-blue-700">Fichas</h2>
-                <p className="text-gray-600 mt-2">Visualize e edite as fichas vinculadas aos clientes.</p>
+                <p className="text-gray-600 mt-2">
+                  Visualize e edite as fichas vinculadas aos clientes.
+                </p>
               </div>
             </Link>
             <Link href="/configuracoes">
               <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition min-h-[130px] flex flex-col justify-between">
-                <h2 className="text-xl font-semibold text-blue-700">Meu Perfil</h2>
-                <p className="text-gray-600 mt-2">Atualize seus dados e configurações.</p>
+                <h2 className="text-xl font-semibold text-blue-700">
+                  Meu Perfil
+                </h2>
+                <p className="text-gray-600 mt-2">
+                  Atualize seus dados e configurações.
+                </p>
               </div>
             </Link>
           </div>
@@ -93,7 +116,10 @@ export default function HomePage() {
             <h2 className="text-lg font-semibold mb-4">Últimas Ações</h2>
             <ul className="space-y-2">
               {acoesRecentes.map((acao, index) => (
-                <li key={index} className="flex justify-between text-sm text-gray-700">
+                <li
+                  key={index}
+                  className="flex justify-between text-sm text-gray-700"
+                >
                   <span>{acao.acao}</span>
                   <span className="text-gray-400">{acao.data}</span>
                 </li>
@@ -102,11 +128,19 @@ export default function HomePage() {
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow mb-10">
-            <h2 className="text-lg font-semibold mb-4">Próximos Compromissos</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              Próximos Compromissos
+            </h2>
             <ul className="text-sm text-gray-700 space-y-2">
-              <li><strong>27/04:</strong> Audiência - Cliente João</li>
-              <li><strong>28/04:</strong> Reunião com Maria</li>
-              <li><strong>29/04:</strong> Encerramento de processo - Ana</li>
+              <li>
+                <strong>27/04:</strong> Audiência - Cliente João
+              </li>
+              <li>
+                <strong>28/04:</strong> Reunião com Maria
+              </li>
+              <li>
+                <strong>29/04:</strong> Encerramento de processo - Ana
+              </li>
             </ul>
           </div>
 

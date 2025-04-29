@@ -1,15 +1,15 @@
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import axios from '@/services/api';
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import axios from "@/services/api";
 import {
   Home,
   LayoutDashboard,
   Users,
   FileText,
   Settings,
-  LogOut
-} from 'lucide-react';
+  LogOut,
+} from "lucide-react";
 
 interface Usuario {
   nome: string;
@@ -59,19 +59,31 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
 
         <nav className="flex flex-col space-y-2">
-          <Link href="/dashboard" className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+          >
             <LayoutDashboard className="w-5 h-5" />
             Dashboard
           </Link>
-          <Link href="/clientes" className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded">
+          <Link
+            href="/clientes"
+            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+          >
             <Users className="w-5 h-5" />
             Clientes
           </Link>
-          <Link href="/fichas" className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded">
+          <Link
+            href="/fichas"
+            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+          >
             <FileText className="w-5 h-5" />
             Fichas
           </Link>
-          <Link href="/configuracoes" className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded">
+          <Link
+            href="/configuracoes"
+            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+          >
             <Settings className="w-5 h-5" />
             Configurações
           </Link>
@@ -86,9 +98,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </button>
       </aside>
 
-      <main className="flex-1 p-8">
-        {children}
-      </main>
+      <main className="flex-1 p-8">{children}</main>
     </div>
   );
 }
