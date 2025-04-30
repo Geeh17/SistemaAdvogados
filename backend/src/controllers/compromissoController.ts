@@ -1,5 +1,17 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma/client";
+import { z } from "zod";
+
+const compromissoSchema = z.object({
+  titulo: z.string().min(3, "Título é obrigatório"),
+  descricao: z.string().optional(),
+  dataHora: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Data e hora inválida",
+  }),
+  tipo: z.enum(["AUDIENCIA", "REUNIAO", "PRAZO"], {
+    errorMap: () => ({ message: "Tipo de compromisso inválido" }),
+  }),
+});
 
 export const listarCompromissos = async (
   req: Request,
@@ -36,23 +48,27 @@ export const criarCompromisso = async (
       return;
     }
 
-    const { titulo, descricao, dataHora, tipo } = req.body;
+    const dados = compromissoSchema.parse(req.body);
 
     const compromisso = await prisma.compromisso.create({
       data: {
-        titulo,
-        descricao,
-        dataHora: new Date(dataHora),
-        tipo,
+        titulo: dados.titulo,
+        descricao: dados.descricao,
+        dataHora: new Date(dados.dataHora),
+        tipo: dados.tipo,
         usuarioId,
       },
     });
 
     res.status(201).json(compromisso);
   } catch (error) {
-    res
-      .status(500)
-      .json({ erro: "Erro ao criar compromisso", detalhes: error });
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ erro: "Dados inválidos", detalhes: error.errors });
+    } else {
+      res
+        .status(500)
+        .json({ erro: "Erro ao criar compromisso", detalhes: error });
+    }
   }
 };
 
@@ -61,10 +77,15 @@ export const deletarCompromisso = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = Number(req.params.id);
+
+    if (isNaN(id) || id <= 0) {
+      res.status(400).json({ erro: "ID inválido" });
+      return;
+    }
 
     await prisma.compromisso.delete({
-      where: { id: Number(id) },
+      where: { id },
     });
 
     res.status(204).send();

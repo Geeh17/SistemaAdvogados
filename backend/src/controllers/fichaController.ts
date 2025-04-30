@@ -1,60 +1,99 @@
-
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 
-export const criarFicha = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { descricao } = req.body;
-    const clienteId = Number(req.params.clienteId);
+const fichaSchema = z.object({
+  descricao: z
+    .string()
+    .min(5, "Descrição é obrigatória e deve ter no mínimo 5 caracteres"),
+});
 
+export const criarFicha = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
     if (!req.usuarioId) {
       res.status(401).json({ erro: "Usuário não autenticado" });
       return;
     }
 
-    const usuario = await prisma.usuario.findUnique({ where: { id: req.usuarioId } });
+    const clienteId = Number(req.params.clienteId);
+    if (isNaN(clienteId) || clienteId <= 0) {
+      res.status(400).json({ erro: "ID do cliente inválido" });
+      return;
+    }
+
+    const dados = fichaSchema.parse(req.body);
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuarioId },
+    });
 
     const cliente = await prisma.cliente.findFirst({
-      where: usuario?.role === "MASTER" ? { id: clienteId } : { id: clienteId, usuarioId: req.usuarioId }
+      where:
+        usuario?.role === "MASTER"
+          ? { id: clienteId }
+          : { id: clienteId, usuarioId: req.usuarioId },
     });
 
     if (!cliente) {
-      res.status(404).json({ erro: "Cliente não encontrado ou não pertence a este usuário" });
+      res.status(404).json({
+        erro: "Cliente não encontrado ou não pertence a este usuário",
+      });
       return;
     }
 
     const ficha = await prisma.ficha.create({
       data: {
-        descricao,
+        descricao: dados.descricao,
         clienteId,
       },
     });
 
     res.status(201).json(ficha);
   } catch (error) {
-    res.status(500).json({ erro: "Erro ao criar ficha", detalhes: error });
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ erro: "Dados inválidos", detalhes: error.errors });
+    } else {
+      res.status(500).json({ erro: "Erro ao criar ficha", detalhes: error });
+    }
   }
 };
 
-export const listarFichasDoCliente = async (req: Request, res: Response): Promise<void> => {
+export const listarFichasDoCliente = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const clienteId = Number(req.params.clienteId);
-
     if (!req.usuarioId) {
       res.status(401).json({ erro: "Usuário não autenticado" });
       return;
     }
 
-    const usuario = await prisma.usuario.findUnique({ where: { id: req.usuarioId } });
+    const clienteId = Number(req.params.clienteId);
+    if (isNaN(clienteId) || clienteId <= 0) {
+      res.status(400).json({ erro: "ID do cliente inválido" });
+      return;
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuarioId },
+    });
 
     const cliente = await prisma.cliente.findFirst({
-      where: usuario?.role === "MASTER" ? { id: clienteId } : { id: clienteId, usuarioId: req.usuarioId }
+      where:
+        usuario?.role === "MASTER"
+          ? { id: clienteId }
+          : { id: clienteId, usuarioId: req.usuarioId },
     });
 
     if (!cliente) {
-      res.status(404).json({ erro: "Cliente não encontrado ou não pertence a este usuário" });
+      res.status(404).json({
+        erro: "Cliente não encontrado ou não pertence a este usuário",
+      });
       return;
     }
 

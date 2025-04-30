@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "@/services/api";
 import Layout from "@/components/Layout";
 import PrivateRoute from "@/components/PrivateRoute";
@@ -10,34 +13,58 @@ interface Usuario {
   role: string;
 }
 
+const perfilSchema = z
+  .object({
+    nome: z.string().min(3, "Nome deve ter no mínimo 3 letras"),
+    email: z.string().email("E-mail inválido"),
+    senhaAtual: z.string().optional(),
+    novaSenha: z
+      .string()
+      .min(9, "Nova senha deve ter no mínimo 9 caracteres")
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.senhaAtual && !data.novaSenha) return false;
+      return true;
+    },
+    {
+      message: "Informe a nova senha ao preencher a senha atual",
+      path: ["novaSenha"],
+    }
+  );
+
+const cadastroSchema = z.object({
+  nome: z.string().min(3, "Nome deve ter no mínimo 3 letras"),
+  email: z.string().email("E-mail inválido"),
+  senha: z.string().min(9, "Senha deve ter no mínimo 9 caracteres"),
+});
+
+type PerfilFormData = z.infer<typeof perfilSchema>;
+type CadastroFormData = z.infer<typeof cadastroSchema>;
+
 export default function ConfiguracoesPage() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]); // << lista de usuários
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [senhaAtual, setSenhaAtual] = useState("");
-  const [novaSenha, setNovaSenha] = useState("");
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
-  const [novoNome, setNovoNome] = useState("");
-  const [novoEmail, setNovoEmail] = useState("");
-  const [novaSenhaUsuario, setNovaSenhaUsuario] = useState("");
+  const perfilForm = useForm<PerfilFormData>({
+    resolver: zodResolver(perfilSchema),
+  });
+  const cadastroForm = useForm<CadastroFormData>({
+    resolver: zodResolver(cadastroSchema),
+  });
 
   useEffect(() => {
     async function carregarPerfil() {
       try {
         const res = await axios.get("/usuarios/perfil");
         setUsuario(res.data);
-        setNome(res.data.nome);
-        setEmail(res.data.email);
-
-        if (res.data.role === "MASTER") {
-          carregarUsuarios(); // se MASTER, carrega também todos os usuários
-        }
+        perfilForm.reset({ nome: res.data.nome, email: res.data.email });
+        if (res.data.role === "MASTER") carregarUsuarios();
       } catch (error) {
         console.error("Erro ao carregar perfil", error);
       }
     }
-
     carregarPerfil();
   }, []);
 
@@ -50,38 +77,23 @@ export default function ConfiguracoesPage() {
     }
   }
 
-  async function atualizarPerfil(e: React.FormEvent) {
-    e.preventDefault();
+  async function atualizarPerfil(data: PerfilFormData) {
     try {
-      await axios.put("/usuarios/perfil", {
-        nome,
-        email,
-        senhaAtual,
-        novaSenha,
-      });
+      await axios.put("/usuarios/perfil", data);
       alert("Perfil atualizado com sucesso!");
-      setSenhaAtual("");
-      setNovaSenha("");
+      perfilForm.reset({ ...data, senhaAtual: "", novaSenha: "" });
     } catch (error) {
       alert("Erro ao atualizar perfil");
       console.error(error);
     }
   }
 
-  async function cadastrarNovoUsuario(e: React.FormEvent) {
-    e.preventDefault();
+  async function cadastrarNovoUsuario(data: CadastroFormData) {
     try {
-      await axios.post("/usuarios", {
-        nome: novoNome,
-        email: novoEmail,
-        senha: novaSenhaUsuario,
-        role: "ADVOGADO", // novo usuário sempre será ADVOGADO
-      });
+      await axios.post("/usuarios", { ...data, role: "ADVOGADO" });
       alert("Novo usuário cadastrado com sucesso!");
-      setNovoNome("");
-      setNovoEmail("");
-      setNovaSenhaUsuario("");
-      carregarUsuarios(); // recarrega lista
+      cadastroForm.reset();
+      carregarUsuarios();
     } catch (error) {
       alert("Erro ao cadastrar usuário");
       console.error(error);
@@ -92,7 +104,7 @@ export default function ConfiguracoesPage() {
     try {
       await axios.put(`/usuarios/${id}`, { role: novoRole });
       alert("Role atualizado com sucesso!");
-      carregarUsuarios(); // recarrega lista
+      carregarUsuarios();
     } catch (error) {
       alert("Erro ao atualizar role");
       console.error(error);
@@ -108,28 +120,37 @@ export default function ConfiguracoesPage() {
           </h1>
 
           {/* Atualizar perfil */}
-          <form onSubmit={atualizarPerfil} className="space-y-5 mb-10">
+          <form
+            onSubmit={perfilForm.handleSubmit(atualizarPerfil)}
+            className="space-y-5 mb-10"
+          >
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Nome
               </label>
               <input
-                type="text"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                {...perfilForm.register("nome")}
+                className="w-full p-2 border rounded-lg"
               />
+              {perfilForm.formState.errors.nome && (
+                <p className="text-red-500 text-sm">
+                  {perfilForm.formState.errors.nome.message}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 E-mail
               </label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                {...perfilForm.register("email")}
+                className="w-full p-2 border rounded-lg"
               />
+              {perfilForm.formState.errors.email && (
+                <p className="text-red-500 text-sm">
+                  {perfilForm.formState.errors.email.message}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -137,9 +158,8 @@ export default function ConfiguracoesPage() {
               </label>
               <input
                 type="password"
-                value={senhaAtual}
-                onChange={(e) => setSenhaAtual(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                {...perfilForm.register("senhaAtual")}
+                className="w-full p-2 border rounded-lg"
               />
             </div>
             <div>
@@ -148,10 +168,14 @@ export default function ConfiguracoesPage() {
               </label>
               <input
                 type="password"
-                value={novaSenha}
-                onChange={(e) => setNovaSenha(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                {...perfilForm.register("novaSenha")}
+                className="w-full p-2 border rounded-lg"
               />
+              {perfilForm.formState.errors.novaSenha && (
+                <p className="text-red-500 text-sm">
+                  {perfilForm.formState.errors.novaSenha.message}
+                </p>
+              )}
             </div>
             <button
               type="submit"
@@ -161,36 +185,51 @@ export default function ConfiguracoesPage() {
             </button>
           </form>
 
-          {/* Apenas para usuários MASTER */}
+          {/* Cadastro e gerenciamento de usuários - visível apenas para MASTER */}
           {usuario?.role === "MASTER" && (
             <div className="bg-gray-100 p-6 rounded-lg shadow-md space-y-10">
               <div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
                   Cadastrar novo usuário
                 </h2>
-
-                <form onSubmit={cadastrarNovoUsuario} className="space-y-4">
+                <form
+                  onSubmit={cadastroForm.handleSubmit(cadastrarNovoUsuario)}
+                  className="space-y-4"
+                >
                   <input
-                    type="text"
                     placeholder="Nome"
-                    value={novoNome}
-                    onChange={(e) => setNovoNome(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    {...cadastroForm.register("nome")}
+                    className="w-full p-2 border rounded-lg"
                   />
+                  {cadastroForm.formState.errors.nome && (
+                    <p className="text-red-500 text-sm">
+                      {cadastroForm.formState.errors.nome.message}
+                    </p>
+                  )}
+
                   <input
-                    type="email"
                     placeholder="E-mail"
-                    value={novoEmail}
-                    onChange={(e) => setNovoEmail(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    {...cadastroForm.register("email")}
+                    className="w-full p-2 border rounded-lg"
                   />
+                  {cadastroForm.formState.errors.email && (
+                    <p className="text-red-500 text-sm">
+                      {cadastroForm.formState.errors.email.message}
+                    </p>
+                  )}
+
                   <input
                     type="password"
                     placeholder="Senha"
-                    value={novaSenhaUsuario}
-                    onChange={(e) => setNovaSenhaUsuario(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    {...cadastroForm.register("senha")}
+                    className="w-full p-2 border rounded-lg"
                   />
+                  {cadastroForm.formState.errors.senha && (
+                    <p className="text-red-500 text-sm">
+                      {cadastroForm.formState.errors.senha.message}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
@@ -204,7 +243,6 @@ export default function ConfiguracoesPage() {
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
                   Usuários cadastrados
                 </h2>
-
                 <table className="w-full bg-white rounded-lg shadow-md overflow-hidden">
                   <thead className="bg-gray-100">
                     <tr>

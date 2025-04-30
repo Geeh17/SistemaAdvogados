@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import InputMask from "react-input-mask";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Cliente {
   id: number;
@@ -16,34 +19,52 @@ interface Props {
   cliente: Cliente | null;
 }
 
+const clienteSchema = z.object({
+  nome: z.string().min(3, "Nome deve ter no mínimo 3 letras"),
+  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
+  telefone: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Telefone inválido"),
+  endereco: z.string().min(5, "Endereço é obrigatório"),
+});
+
+type ClienteFormData = z.infer<typeof clienteSchema>;
+
 export default function ModalCliente({
   isOpen,
   onClose,
   onSubmit,
   cliente,
 }: Props) {
-  const [nome, setNome] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [endereco, setEndereco] = useState("");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<ClienteFormData>({
+    resolver: zodResolver(clienteSchema),
+  });
 
   useEffect(() => {
     if (cliente) {
-      setNome(cliente.nome);
-      setCpf(cliente.cpf);
-      setTelefone(cliente.telefone);
-      setEndereco(cliente.endereco);
+      reset({
+        nome: cliente.nome,
+        cpf: cliente.cpf,
+        telefone: cliente.telefone,
+        endereco: cliente.endereco,
+      });
     } else {
-      setNome("");
-      setCpf("");
-      setTelefone("");
-      setEndereco("");
+      reset({
+        nome: "",
+        cpf: "",
+        telefone: "",
+        endereco: "",
+      });
     }
-  }, [cliente]);
+  }, [cliente, reset]);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    onSubmit({ nome, cpf, telefone, endereco });
+  function handleFormSubmit(data: ClienteFormData) {
+    onSubmit(data as Omit<Cliente, "id">);
   }
 
   if (!isOpen) return null;
@@ -54,39 +75,67 @@ export default function ModalCliente({
         <h2 className="text-lg font-semibold mb-4">
           {cliente ? "Editar Cliente" : "Cadastrar Cliente"}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Nome"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-          />
-          <InputMask
-            mask="999.999.999-99"
-            placeholder="CPF"
-            value={cpf}
-            onChange={(e) => setCpf(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-          />
-          <InputMask
-            mask="(99) 99999-9999"
-            placeholder="Telefone"
-            value={telefone}
-            onChange={(e) => setTelefone(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Endereço"
-            value={endereco}
-            onChange={(e) => setEndereco(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-          />
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          <div>
+            <input
+              type="text"
+              placeholder="Nome"
+              {...register("nome")}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            {errors.nome && (
+              <p className="text-red-500 text-sm">{errors.nome.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Controller
+              name="cpf"
+              control={control}
+              render={({ field }) => (
+                <InputMask
+                  mask="999.999.999-99"
+                  placeholder="CPF"
+                  {...field}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              )}
+            />
+            {errors.cpf && (
+              <p className="text-red-500 text-sm">{errors.cpf.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Controller
+              name="telefone"
+              control={control}
+              render={({ field }) => (
+                <InputMask
+                  mask="(99) 99999-9999"
+                  placeholder="Telefone"
+                  {...field}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              )}
+            />
+            {errors.telefone && (
+              <p className="text-red-500 text-sm">{errors.telefone.message}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              type="text"
+              placeholder="Endereço"
+              {...register("endereco")}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            {errors.endereco && (
+              <p className="text-red-500 text-sm">{errors.endereco.message}</p>
+            )}
+          </div>
+
           <div className="flex justify-end space-x-2">
             <button
               type="button"

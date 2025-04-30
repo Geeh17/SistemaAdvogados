@@ -1,26 +1,45 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma/client";
+import { z } from "zod";
+
+const andamentoSchema = z.object({
+  descricao: z
+    .string()
+    .min(5, "Descrição é obrigatória e deve ter no mínimo 5 caracteres"),
+  fichaId: z.number().int().positive("ID da ficha deve ser um número positivo"),
+});
 
 export const criarAndamento = async (req: Request, res: Response) => {
   try {
-    const { descricao, fichaId } = req.body;
+    const dados = andamentoSchema.parse({
+      descricao: req.body.descricao,
+      fichaId: Number(req.body.fichaId),
+    });
 
     const andamento = await prisma.andamento.create({
-      data: {
-        descricao,
-        fichaId,
-      },
+      data: dados,
     });
 
     res.status(201).json(andamento);
   } catch (error) {
-    res.status(500).json({ erro: "Erro ao criar andamento", detalhes: error });
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ erro: "Dados inválidos", detalhes: error.errors });
+    } else {
+      res
+        .status(500)
+        .json({ erro: "Erro ao criar andamento", detalhes: error });
+    }
   }
 };
 
 export const listarAndamentosPorFicha = async (req: Request, res: Response) => {
   try {
-    const fichaId = parseInt(req.params.fichaId);
+    const fichaId = Number(req.params.fichaId);
+
+    if (isNaN(fichaId) || fichaId <= 0) {
+      res.status(400).json({ erro: "ID da ficha inválido" });
+      return;
+    }
 
     const andamentos = await prisma.andamento.findMany({
       where: { fichaId },
@@ -37,7 +56,12 @@ export const listarAndamentosPorFicha = async (req: Request, res: Response) => {
 
 export const deletarAndamento = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = Number(req.params.id);
+
+    if (isNaN(id) || id <= 0) {
+      res.status(400).json({ erro: "ID inválido" });
+      return;
+    }
 
     await prisma.andamento.delete({
       where: { id },

@@ -1,13 +1,34 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma/client";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const criarUsuarioSchema = z.object({
+  nome: z.string().min(3, "Nome é obrigatório"),
+  email: z.string().email("E-mail inválido"),
+  senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+  role: z.enum(["MASTER", "ADVOGADO"]),
+});
+
+const atualizarUsuarioSchema = z.object({
+  nome: z.string().min(3),
+  email: z.string().email(),
+  role: z.enum(["MASTER", "ADVOGADO"]),
+});
+
+const atualizarPerfilSchema = z.object({
+  nome: z.string().min(3),
+  email: z.string().email(),
+  senhaAtual: z.string().optional(),
+  novaSenha: z.string().optional(),
+});
 
 export async function criarUsuario(req: Request, res: Response): Promise<void> {
-  const { nome, email, senha, role } = req.body;
-
   try {
+    const dados = criarUsuarioSchema.parse(req.body);
+
     const usuarioExistente = await prisma.usuario.findUnique({
-      where: { email },
+      where: { email: dados.email },
     });
 
     if (usuarioExistente) {
@@ -15,14 +36,23 @@ export async function criarUsuario(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const senhaHash = await bcrypt.hash(senha, 10);
+    const senhaHash = await bcrypt.hash(dados.senha, 10);
     const novoUsuario = await prisma.usuario.create({
-      data: { nome, email, senha: senhaHash, role },
+      data: {
+        nome: dados.nome,
+        email: dados.email,
+        senha: senhaHash,
+        role: dados.role,
+      },
     });
 
     res.status(201).json(novoUsuario);
   } catch (error) {
-    res.status(500).json({ erro: "Erro ao criar usuário.", detalhes: error });
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ erro: "Dados inválidos", detalhes: error.errors });
+    } else {
+      res.status(500).json({ erro: "Erro ao criar usuário.", detalhes: error });
+    }
   }
 }
 
@@ -32,12 +62,7 @@ export async function listarUsuarios(
 ): Promise<void> {
   try {
     const usuarios = await prisma.usuario.findMany({
-      select: {
-        id: true,
-        nome: true,
-        email: true,
-        role: true,
-      },
+      select: { id: true, nome: true, email: true, role: true },
     });
     res.json(usuarios);
   } catch (error) {
@@ -51,15 +76,9 @@ export async function obterUsuarioPorId(
 ): Promise<void> {
   try {
     const { id } = req.params;
-
     const usuario = await prisma.usuario.findUnique({
       where: { id: Number(id) },
-      select: {
-        id: true,
-        nome: true,
-        email: true,
-        role: true,
-      },
+      select: { id: true, nome: true, email: true, role: true },
     });
 
     if (!usuario) {
@@ -79,7 +98,7 @@ export async function atualizarUsuarioPorId(
 ): Promise<void> {
   try {
     const { id } = req.params;
-    const { nome, email, role } = req.body;
+    const dados = atualizarUsuarioSchema.parse(req.body);
 
     const usuarioExistente = await prisma.usuario.findUnique({
       where: { id: Number(id) },
@@ -92,14 +111,18 @@ export async function atualizarUsuarioPorId(
 
     const usuarioAtualizado = await prisma.usuario.update({
       where: { id: Number(id) },
-      data: { nome, email, role },
+      data: dados,
     });
 
     res.json(usuarioAtualizado);
   } catch (error) {
-    res
-      .status(500)
-      .json({ erro: "Erro ao atualizar usuário.", detalhes: error });
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ erro: "Dados inválidos", detalhes: error.errors });
+    } else {
+      res
+        .status(500)
+        .json({ erro: "Erro ao atualizar usuário.", detalhes: error });
+    }
   }
 }
 
@@ -119,9 +142,7 @@ export async function deletarUsuario(
       return;
     }
 
-    await prisma.usuario.delete({
-      where: { id: Number(id) },
-    });
+    await prisma.usuario.delete({ where: { id: Number(id) } });
 
     res.json({ mensagem: "Usuário deletado com sucesso." });
   } catch (error) {
@@ -138,12 +159,7 @@ export async function obterUsuario(req: Request, res: Response): Promise<void> {
 
     const usuario = await prisma.usuario.findUnique({
       where: { id: req.usuarioId },
-      select: {
-        id: true,
-        nome: true,
-        email: true,
-        role: true,
-      },
+      select: { id: true, nome: true, email: true, role: true },
     });
 
     if (!usuario) {
@@ -164,7 +180,7 @@ export async function atualizarUsuario(
   res: Response
 ): Promise<void> {
   try {
-    const { nome, email, senhaAtual, novaSenha } = req.body;
+    const dados = atualizarPerfilSchema.parse(req.body);
 
     if (!req.usuarioId) {
       res.status(401).json({ erro: "Usuário não autenticado." });
@@ -180,29 +196,33 @@ export async function atualizarUsuario(
       return;
     }
 
-    if (senhaAtual && novaSenha) {
-      const senhaValida = await bcrypt.compare(senhaAtual, usuario.senha);
+    if (dados.senhaAtual && dados.novaSenha) {
+      const senhaValida = await bcrypt.compare(dados.senhaAtual, usuario.senha);
       if (!senhaValida) {
         res.status(401).json({ erro: "Senha atual incorreta." });
         return;
       }
 
-      const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+      const novaSenhaHash = await bcrypt.hash(dados.novaSenha, 10);
       await prisma.usuario.update({
         where: { id: req.usuarioId },
-        data: { nome, email, senha: novaSenhaHash },
+        data: { nome: dados.nome, email: dados.email, senha: novaSenhaHash },
       });
     } else {
       await prisma.usuario.update({
         where: { id: req.usuarioId },
-        data: { nome, email },
+        data: { nome: dados.nome, email: dados.email },
       });
     }
 
     res.json({ mensagem: "Usuário atualizado com sucesso." });
   } catch (error) {
-    res
-      .status(500)
-      .json({ erro: "Erro ao atualizar perfil.", detalhes: error });
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ erro: "Dados inválidos", detalhes: error.errors });
+    } else {
+      res
+        .status(500)
+        .json({ erro: "Erro ao atualizar perfil.", detalhes: error });
+    }
   }
 }
