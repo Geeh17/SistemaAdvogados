@@ -9,7 +9,8 @@ import {
   FileText,
   Settings,
   LogOut,
-} from "lucide-react";
+  CalendarClock,
+} from "lucide-react"; // 👈 adiciona o ícone da agenda
 
 interface Usuario {
   nome: string;
@@ -79,6 +80,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           >
             <FileText className="w-5 h-5" />
             Fichas
+          </Link>
+          <Link
+            href="/agenda"
+            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+          >
+            <CalendarClock className="w-5 h-5" />
+            Agenda
           </Link>
 
           {usuario?.role === "MASTER" && (

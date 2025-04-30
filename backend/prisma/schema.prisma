@@ -8,12 +8,13 @@ datasource db {
 }
 
 model Usuario {
-  id        Int       @id @default(autoincrement())
-  nome      String
-  email     String    @unique
-  senha     String
-  role      Role      @default(ADVOGADO)
-  clientes  Cliente[]
+  id            Int            @id @default(autoincrement())
+  nome          String
+  email         String         @unique
+  senha         String
+  role          Role           @default(ADVOGADO)
+  clientes      Cliente[]
+  compromissos  Compromisso[] 
 }
 
 model Cliente {
@@ -43,6 +44,23 @@ model Andamento {
   data      DateTime  @default(now())
   ficha     Ficha     @relation(fields: [fichaId], references: [id])
   fichaId   Int
+}
+
+model Compromisso {
+  id          Int              @id @default(autoincrement())
+  titulo      String
+  descricao   String?
+  dataHora    DateTime
+  tipo        TipoCompromisso
+  usuarioId   Int
+  usuario     Usuario          @relation(fields: [usuarioId], references: [id])
+  criadoEm    DateTime         @default(now())
+}
+
+enum TipoCompromisso {
+  AUDIENCIA
+  REUNIAO
+  PRAZO
 }
 
 enum Role {
