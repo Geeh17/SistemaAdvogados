@@ -8,32 +8,41 @@ datasource db {
 }
 
 model Usuario {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   nome      String
-  email     String   @unique
+  email     String    @unique
   senha     String
-  role      Role     @default(ADVOGADO)
+  role      Role      @default(ADVOGADO)
   clientes  Cliente[]
 }
 
 model Cliente {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   nome       String
-  cpf        String   @unique
+  cpf        String    @unique
   telefone   String
   endereco   String?
   usuarioId  Int
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  usuario    Usuario   @relation(fields: [usuarioId], references: [id])
   fichas     Ficha[]
-  createdAt  DateTime @default(now()) 
+  createdAt  DateTime  @default(now()) 
 }
 
 model Ficha {
-  id         Int      @id @default(autoincrement())
-  descricao  String
-  data       DateTime @default(now())
-  cliente    Cliente  @relation(fields: [clienteId], references: [id])
-  clienteId  Int
+  id          Int         @id @default(autoincrement())
+  descricao   String
+  data        DateTime    @default(now())
+  cliente     Cliente     @relation(fields: [clienteId], references: [id])
+  clienteId   Int
+  andamentos  Andamento[] 
+}
+
+model Andamento {
+  id        Int       @id @default(autoincrement())
+  descricao String
+  data      DateTime  @default(now())
+  ficha     Ficha     @relation(fields: [fichaId], references: [id])
+  fichaId   Int
 }
 
 enum Role {

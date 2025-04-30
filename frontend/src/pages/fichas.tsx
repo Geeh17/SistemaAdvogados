@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "@/services/api";
 import Layout from "@/components/Layout";
 import PrivateRoute from "@/components/PrivateRoute";
-import { CalendarDays, FileDown } from "lucide-react";
+import ModalAndamento from "@/components/ModalAndamento";
+import { CalendarDays, FileDown, Trash } from "lucide-react";
 
 interface Cliente {
   id: number;
@@ -29,6 +30,10 @@ export default function FichasPage() {
 
   const [buscaNome, setBuscaNome] = useState("");
   const [sugestoes, setSugestoes] = useState<Cliente[]>([]);
+
+  const [andamentos, setAndamentos] = useState<any[]>([]);
+  const [fichaSelecionada, setFichaSelecionada] = useState<number | null>(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   useEffect(() => {
     axios.get("/clientes").then((res) => setClientes(res.data));
@@ -99,6 +104,26 @@ export default function FichasPage() {
       link.remove();
     } catch (err) {
       console.error("Erro ao baixar PDF", err);
+    }
+  }
+
+  async function buscarAndamentos(fichaId: number) {
+    try {
+      const res = await axios.get(`/andamentos/${fichaId}`);
+      setAndamentos(res.data);
+      setFichaSelecionada(fichaId);
+      setMostrarModal(true);
+    } catch (err) {
+      console.error("Erro ao buscar andamentos", err);
+    }
+  }
+
+  async function deletarAndamento(id: number) {
+    try {
+      await axios.delete(`/andamentos/${id}`);
+      setAndamentos((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      console.error("Erro ao deletar andamento", err);
     }
   }
 
@@ -217,21 +242,31 @@ export default function FichasPage() {
                     {fichasFiltradas.map((ficha) => (
                       <li
                         key={ficha.id}
-                        className="bg-white p-4 rounded-lg shadow flex justify-between items-center"
+                        className="bg-white p-4 rounded-lg shadow"
                       >
-                        <div>
-                          <p className="font-medium">{ficha.descricao}</p>
-                          <span className="text-sm text-gray-500 flex items-center gap-1">
-                            <CalendarDays className="w-4 h-4" />
-                            {new Date(ficha.data).toLocaleDateString()}
-                          </span>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{ficha.descricao}</p>
+                            <span className="text-sm text-gray-500 flex items-center gap-1">
+                              <CalendarDays className="w-4 h-4" />
+                              {new Date(ficha.data).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex gap-4">
+                            <button
+                              onClick={() => baixarPdf(ficha.id)}
+                              className="text-blue-600 hover:underline text-sm flex items-center gap-1"
+                            >
+                              <FileDown className="w-4 h-4" /> PDF
+                            </button>
+                            <button
+                              onClick={() => buscarAndamentos(ficha.id)}
+                              className="text-sm text-blue-600 hover:underline"
+                            >
+                              Ver Andamentos
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => baixarPdf(ficha.id)}
-                          className="text-blue-600 hover:underline text-sm flex items-center gap-1"
-                        >
-                          <FileDown className="w-4 h-4" /> PDF
-                        </button>
                       </li>
                     ))}
                   </ul>
@@ -240,6 +275,47 @@ export default function FichasPage() {
             </>
           )}
         </div>
+
+        {mostrarModal && fichaSelecionada !== null && (
+          <ModalAndamento
+            fichaId={fichaSelecionada}
+            onClose={() => {
+              setMostrarModal(false);
+              setFichaSelecionada(null);
+            }}
+            onAdd={(novo) => setAndamentos((prev) => [novo, ...prev])}
+          />
+        )}
+
+        {andamentos.length > 0 && (
+          <div className="max-w-5xl mx-auto mt-8 bg-white p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4">
+              Andamentos da ficha #{fichaSelecionada}
+            </h3>
+            <ul className="space-y-3">
+              {andamentos.map((a) => (
+                <li
+                  key={a.id}
+                  className="border-b pb-2 flex justify-between items-start"
+                >
+                  <div>
+                    <p className="text-sm text-gray-800">{a.descricao}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(a.data).toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => deletarAndamento(a.id)}
+                    className="text-red-600 hover:text-red-800"
+                    title="Excluir andamento"
+                  >
+                    <Trash className="w-4 h-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Layout>
     </PrivateRoute>
   );
