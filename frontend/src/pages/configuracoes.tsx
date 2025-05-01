@@ -115,22 +115,21 @@ export default function ConfiguracoesPage() {
     <PrivateRoute>
       <Layout>
         <div className="max-w-6xl mx-auto py-10">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
             Configurações da Conta
           </h1>
 
-          {/* Atualizar perfil */}
           <form
             onSubmit={perfilForm.handleSubmit(atualizarPerfil)}
             className="space-y-5 mb-10"
           >
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium dark:text-white">
                 Nome
               </label>
               <input
                 {...perfilForm.register("nome")}
-                className="w-full p-2 border rounded-lg"
+                className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
               />
               {perfilForm.formState.errors.nome && (
                 <p className="text-red-500 text-sm">
@@ -139,12 +138,12 @@ export default function ConfiguracoesPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium dark:text-white">
                 E-mail
               </label>
               <input
                 {...perfilForm.register("email")}
-                className="w-full p-2 border rounded-lg"
+                className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
               />
               {perfilForm.formState.errors.email && (
                 <p className="text-red-500 text-sm">
@@ -153,23 +152,23 @@ export default function ConfiguracoesPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium dark:text-white">
                 Senha atual
               </label>
               <input
                 type="password"
                 {...perfilForm.register("senhaAtual")}
-                className="w-full p-2 border rounded-lg"
+                className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium dark:text-white">
                 Nova senha
               </label>
               <input
                 type="password"
                 {...perfilForm.register("novaSenha")}
-                className="w-full p-2 border rounded-lg"
+                className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
               />
               {perfilForm.formState.errors.novaSenha && (
                 <p className="text-red-500 text-sm">
@@ -185,11 +184,10 @@ export default function ConfiguracoesPage() {
             </button>
           </form>
 
-          {/* Cadastro e gerenciamento de usuários - visível apenas para MASTER */}
           {usuario?.role === "MASTER" && (
-            <div className="bg-gray-100 p-6 rounded-lg shadow-md space-y-10">
+            <div className="bg-gray-100 dark:bg-gray-900 p-6 rounded-lg shadow-md space-y-10">
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                   Cadastrar novo usuário
                 </h2>
                 <form
@@ -199,7 +197,7 @@ export default function ConfiguracoesPage() {
                   <input
                     placeholder="Nome"
                     {...cadastroForm.register("nome")}
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                   />
                   {cadastroForm.formState.errors.nome && (
                     <p className="text-red-500 text-sm">
@@ -210,7 +208,7 @@ export default function ConfiguracoesPage() {
                   <input
                     placeholder="E-mail"
                     {...cadastroForm.register("email")}
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                   />
                   {cadastroForm.formState.errors.email && (
                     <p className="text-red-500 text-sm">
@@ -222,7 +220,7 @@ export default function ConfiguracoesPage() {
                     type="password"
                     placeholder="Senha"
                     {...cadastroForm.register("senha")}
-                    className="w-full p-2 border rounded-lg"
+                    className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                   />
                   {cadastroForm.formState.errors.senha && (
                     <p className="text-red-500 text-sm">
@@ -240,11 +238,11 @@ export default function ConfiguracoesPage() {
               </div>
 
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                   Usuários cadastrados
                 </h2>
-                <table className="w-full bg-white rounded-lg shadow-md overflow-hidden">
-                  <thead className="bg-gray-100">
+                <table className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                  <thead className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white">
                     <tr>
                       <th className="text-left p-3">Nome</th>
                       <th className="text-left p-3">E-mail</th>
@@ -254,15 +252,21 @@ export default function ConfiguracoesPage() {
                   </thead>
                   <tbody>
                     {usuarios.map((u) => (
-                      <tr key={u.id} className="border-b">
-                        <td className="p-3">{u.nome}</td>
-                        <td className="p-3">{u.email}</td>
-                        <td className="p-3">{u.role}</td>
+                      <tr key={u.id} className="border-b dark:border-gray-600">
+                        <td className="p-3 text-gray-800 dark:text-white">
+                          {u.nome}
+                        </td>
+                        <td className="p-3 text-gray-600 dark:text-gray-300">
+                          {u.email}
+                        </td>
+                        <td className="p-3 text-gray-600 dark:text-gray-300">
+                          {u.role}
+                        </td>
                         <td className="p-3 text-center">
                           <select
                             value={u.role}
                             onChange={(e) => alterarRole(u.id, e.target.value)}
-                            className="p-2 border rounded-md"
+                            className="p-2 border rounded-md bg-white text-gray-900 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                           >
                             <option value="MASTER">MASTER</option>
                             <option value="ADVOGADO">ADVOGADO</option>

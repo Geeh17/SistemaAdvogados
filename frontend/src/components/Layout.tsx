@@ -10,7 +10,9 @@ import {
   Settings,
   LogOut,
   CalendarClock,
-} from "lucide-react"; // 👈 adiciona o ícone da agenda
+  Sun,
+  Moon,
+} from "lucide-react";
 
 interface Usuario {
   nome: string;
@@ -21,6 +23,7 @@ interface Usuario {
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     async function carregarUsuario() {
@@ -40,19 +43,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     router.push("/");
   }
 
+  function toggleDarkMode() {
+    document.documentElement.classList.toggle("dark");
+    setDarkMode(!darkMode);
+  }
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <aside className="w-64 bg-blue-800 text-white p-6 space-y-6 flex flex-col">
-        <button
-          onClick={() => router.push("/home")}
-          className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
-        >
-          <Home className="w-5 h-5" />
-          <span className="text-sm">Início</span>
-        </button>
+    <div className="flex h-screen dark:bg-gray-900 dark:text-white">
+      <aside className="w-64 bg-blue-800 dark:bg-gray-800 text-white flex flex-col p-6">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => router.push("/home")}
+            className="text-xl font-bold text-white"
+          >
+            <span className="hidden md:inline">📚 Advotech</span>
+          </button>
+          <button onClick={toggleDarkMode}>
+            {darkMode ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </button>
+        </div>
 
         {usuario && (
-          <div className="text-sm border-b border-blue-700 pb-4 mb-4">
+          <div className="text-sm border-b border-blue-700 dark:border-gray-700 pb-4 mb-4">
             <p className="font-medium">{usuario.nome}</p>
             <p className="text-blue-200 text-xs">{usuario.email}</p>
             <p className="text-blue-300 italic text-xs">{usuario.role}</p>
@@ -62,40 +78,39 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <nav className="flex flex-col space-y-2">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+            className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
           >
             <LayoutDashboard className="w-5 h-5" />
             Dashboard
           </Link>
           <Link
             href="/clientes"
-            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+            className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
           >
             <Users className="w-5 h-5" />
             Clientes
           </Link>
           <Link
             href="/fichas"
-            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+            className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
           >
             <FileText className="w-5 h-5" />
             Fichas
           </Link>
           <Link
             href="/agenda"
-            className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+            className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
           >
             <CalendarClock className="w-5 h-5" />
             Agenda
           </Link>
-
           {usuario?.role === "MASTER" && (
             <Link
               href="/configuracoes"
-              className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded"
+              className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
             >
               <Settings className="w-5 h-5" />
-              Cadastro de usuario
+              Cadastro de usuário
             </Link>
           )}
         </nav>
@@ -109,7 +124,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </button>
       </aside>
 
-      <main className="flex-1 p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto p-8 bg-gray-100 dark:bg-gray-900">
+        {children}
+      </main>
     </div>
   );
 }

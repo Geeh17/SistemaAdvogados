@@ -70,7 +70,9 @@ export default function ClientesPage() {
     <PrivateRoute>
       <Layout>
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-800">Clientes</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            Clientes
+          </h1>
           <button
             onClick={() => openModal()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
@@ -82,14 +84,15 @@ export default function ClientesPage() {
         <input
           type="text"
           placeholder="Buscar cliente..."
-          className="mb-4 p-2 border border-gray-300 rounded w-full max-w-md"
+          className="mb-4 p-2 border rounded w-full max-w-md bg-white text-gray-900 
+                     dark:bg-gray-800 dark:text-white dark:border-gray-700"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
         />
 
-        <div className="bg-white shadow rounded-lg overflow-auto">
+        <div className="bg-white dark:bg-gray-900 shadow rounded-lg overflow-auto">
           <table className="min-w-full table-auto">
-            <thead className="bg-gray-100 text-gray-700">
+            <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-medium">
                   Nome
@@ -108,23 +111,26 @@ export default function ClientesPage() {
             </thead>
             <tbody>
               {clientesFiltrados.map((cliente) => (
-                <tr key={cliente.id} className="border-b">
-                  <td className="px-6 py-4 text-sm text-gray-800">
+                <tr
+                  key={cliente.id}
+                  className="border-b border-gray-200 dark:border-gray-700"
+                >
+                  <td className="px-6 py-4 text-sm text-gray-800 dark:text-white">
                     {cliente.nome}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {formatCPF(cliente.cpf)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {formatTelefone(cliente.telefone)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {cliente.endereco}
                   </td>
                   <td className="px-6 py-4 text-sm text-right space-x-2">
                     <button
                       onClick={() => openModal(cliente)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-blue-600 hover:text-blue-800 dark:hover:text-blue-400"
                       aria-label="Editar cliente"
                     >
                       <Pencil className="w-4 h-4 inline" />

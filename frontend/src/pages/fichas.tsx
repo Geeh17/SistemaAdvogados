@@ -140,17 +140,16 @@ export default function FichasPage() {
       : true;
     return correspondeDescricao && correspondeAno && correspondeMes;
   });
-
   return (
     <PrivateRoute>
       <Layout>
         <div className="max-w-5xl mx-auto py-10">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
             Fichas Jurídicas
           </h1>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
               Buscar cliente
             </label>
             <input
@@ -158,15 +157,15 @@ export default function FichasPage() {
               value={buscaNome}
               onChange={(e) => setBuscaNome(e.target.value)}
               placeholder="Digite o nome do cliente..."
-              className="w-full p-2 border border-gray-300 rounded-lg"
+              className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
             />
             {sugestoes.length > 0 && (
-              <ul className="border border-gray-200 rounded-lg mt-1 max-h-40 overflow-y-auto bg-white shadow z-10 relative">
+              <ul className="border border-gray-200 dark:border-gray-700 rounded-lg mt-1 max-h-40 overflow-y-auto bg-white dark:bg-gray-800 shadow z-10 relative">
                 {sugestoes.map((cliente) => (
                   <li
                     key={cliente.id}
                     onClick={() => selecionarCliente(cliente.id, cliente.nome)}
-                    className="p-2 hover:bg-blue-50 cursor-pointer"
+                    className="p-2 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer"
                   >
                     {cliente.nome}
                   </li>
@@ -176,12 +175,12 @@ export default function FichasPage() {
           </div>
 
           {!clienteSelecionado ? (
-            <p className="text-gray-600 italic">
+            <p className="text-gray-600 dark:text-gray-300 italic">
               Favor buscar e selecionar um cliente para ver seu histórico.
             </p>
           ) : (
             <>
-              <p className="text-sm text-gray-700 mb-4">
+              <p className="text-sm text-gray-700 dark:text-white mb-4">
                 Total de fichas:{" "}
                 <span className="font-semibold">{fichasFiltradas.length}</span>
               </p>
@@ -192,33 +191,33 @@ export default function FichasPage() {
                   placeholder="Buscar por descrição..."
                   value={filtroDescricao}
                   onChange={(e) => setFiltroDescricao(e.target.value)}
-                  className="p-2 border border-gray-300 rounded-lg"
+                  className="p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 />
                 <input
                   type="number"
                   placeholder="Ano (ex: 2024)"
                   value={filtroAno}
                   onChange={(e) => setFiltroAno(e.target.value)}
-                  className="p-2 border border-gray-300 rounded-lg"
+                  className="p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 />
                 <input
                   type="number"
                   placeholder="Mês (ex: 04)"
                   value={filtroMes}
                   onChange={(e) => setFiltroMes(e.target.value)}
-                  className="p-2 border border-gray-300 rounded-lg"
+                  className="p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 />
               </div>
 
               <form onSubmit={criarFicha} className="mb-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white">
                     Descrição da ficha
                   </label>
                   <textarea
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
+                    className="w-full p-3 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                     rows={4}
                     placeholder="Descreva o atendimento"
                   />
@@ -232,22 +231,26 @@ export default function FichasPage() {
               </form>
 
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                   Fichas encontradas
                 </h2>
                 {fichasFiltradas.length === 0 ? (
-                  <p className="text-gray-500">Nenhuma ficha encontrada.</p>
+                  <p className="text-gray-500 dark:text-gray-300">
+                    Nenhuma ficha encontrada.
+                  </p>
                 ) : (
                   <ul className="space-y-3">
                     {fichasFiltradas.map((ficha) => (
                       <li
                         key={ficha.id}
-                        className="bg-white p-4 rounded-lg shadow"
+                        className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow"
                       >
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="font-medium">{ficha.descricao}</p>
-                            <span className="text-sm text-gray-500 flex items-center gap-1">
+                            <p className="font-medium dark:text-white">
+                              {ficha.descricao}
+                            </p>
+                            <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                               <CalendarDays className="w-4 h-4" />
                               {new Date(ficha.data).toLocaleDateString()}
                             </span>
@@ -288,19 +291,21 @@ export default function FichasPage() {
         )}
 
         {andamentos.length > 0 && (
-          <div className="max-w-5xl mx-auto mt-8 bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">
+          <div className="max-w-5xl mx-auto mt-8 bg-white dark:bg-gray-900 p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold dark:text-white mb-4">
               Andamentos da ficha #{fichaSelecionada}
             </h3>
             <ul className="space-y-3">
               {andamentos.map((a) => (
                 <li
                   key={a.id}
-                  className="border-b pb-2 flex justify-between items-start"
+                  className="border-b dark:border-gray-600 pb-2 flex justify-between items-start"
                 >
                   <div>
-                    <p className="text-sm text-gray-800">{a.descricao}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-gray-800 dark:text-white">
+                      {a.descricao}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {new Date(a.data).toLocaleString()}
                     </p>
                   </div>

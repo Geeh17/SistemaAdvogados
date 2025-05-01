@@ -44,7 +44,7 @@ export default function HomePage() {
   return (
     <PrivateRoute>
       <Layout>
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
           Painel Administrativo
         </h1>
 
@@ -66,22 +66,23 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Gráficos */}
-        {dashboard?.fichasPorMes && (
-          <BarChartComponent
-            data={dashboard.fichasPorMes}
-            titulo="Fichas Criadas por Mês"
-          />
-        )}
-        {clientesPorMes.length > 0 && (
-          <BarChartComponent
-            data={clientesPorMes}
-            titulo="Clientes Cadastrados por Mês"
-          />
-        )}
-        {rankingAdvogados.length > 0 && (
-          <PieChartComponent data={rankingAdvogados} />
-        )}
+        <div className="mt-8 space-y-8">
+          {dashboard?.fichasPorMes && (
+            <BarChartComponent
+              data={dashboard.fichasPorMes}
+              titulo="Fichas Criadas por Mês"
+            />
+          )}
+          {clientesPorMes.length > 0 && (
+            <BarChartComponent
+              data={clientesPorMes}
+              titulo="Clientes Cadastrados por Mês"
+            />
+          )}
+          {rankingAdvogados.length > 0 && (
+            <PieChartComponent data={rankingAdvogados} />
+          )}
+        </div>
       </Layout>
     </PrivateRoute>
   );
@@ -95,12 +96,14 @@ interface CardProps {
 
 function Card({ title, value, icon }: CardProps) {
   return (
-    <div className="bg-blue-600 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+    <div className="bg-blue-600 dark:bg-blue-700 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
       <div>
         <p className="text-sm font-medium">{title}</p>
         <h2 className="text-3xl font-bold mt-1">{value}</h2>
       </div>
-      <div className="bg-blue-800 p-3 rounded-full">{icon}</div>
+      <div className="bg-blue-800 dark:bg-blue-900 p-3 rounded-full">
+        {icon}
+      </div>
     </div>
   );
 }

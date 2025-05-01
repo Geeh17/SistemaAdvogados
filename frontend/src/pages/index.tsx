@@ -30,7 +30,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-600 to-blue-800">
+    <div
+      className="flex justify-center items-center h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/bg-login.png')" }}
+    >
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md space-y-6 text-center"
