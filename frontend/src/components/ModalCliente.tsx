@@ -38,7 +38,6 @@ export default function ModalCliente({
     register,
     handleSubmit,
     reset,
-    setValue,
     control,
     formState: { errors },
   } = useForm<ClienteFormData>({
@@ -71,7 +70,7 @@ export default function ModalCliente({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg">
+      <div className="bg-white dark:bg-gray-900 text-black dark:text-white p-6 rounded-lg w-full max-w-md shadow-lg">
         <h2 className="text-lg font-semibold mb-4">
           {cliente ? "Editar Cliente" : "Cadastrar Cliente"}
         </h2>
@@ -81,7 +80,7 @@ export default function ModalCliente({
               type="text"
               placeholder="Nome"
               {...register("nome")}
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded"
             />
             {errors.nome && (
               <p className="text-red-500 text-sm">{errors.nome.message}</p>
@@ -97,7 +96,7 @@ export default function ModalCliente({
                   mask="999.999.999-99"
                   placeholder="CPF"
                   {...field}
-                  className="w-full p-2 border border-gray-300 rounded"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded"
                 />
               )}
             />
@@ -115,7 +114,7 @@ export default function ModalCliente({
                   mask="(99) 99999-9999"
                   placeholder="Telefone"
                   {...field}
-                  className="w-full p-2 border border-gray-300 rounded"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded"
                 />
               )}
             />
@@ -129,7 +128,7 @@ export default function ModalCliente({
               type="text"
               placeholder="Endereço"
               {...register("endereco")}
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded"
             />
             {errors.endereco && (
               <p className="text-red-500 text-sm">{errors.endereco.message}</p>
@@ -140,13 +139,13 @@ export default function ModalCliente({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 rounded"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white rounded"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
             >
               Salvar
             </button>

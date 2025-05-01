@@ -53,7 +53,7 @@ export default function LoginPage() {
             type="email"
             {...register("email")}
             placeholder="Digite seu e-mail"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.email && (
             <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
@@ -68,7 +68,7 @@ export default function LoginPage() {
             type="password"
             {...register("senha")}
             placeholder="Digite sua senha"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.senha && (
             <p className="text-sm text-red-500 mt-1">{errors.senha.message}</p>
