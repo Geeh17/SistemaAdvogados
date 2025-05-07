@@ -11,9 +11,10 @@ const criarUsuarioSchema = z.object({
 });
 
 const atualizarUsuarioSchema = z.object({
-  nome: z.string().min(3),
-  email: z.string().email(),
-  role: z.enum(["MASTER", "ADVOGADO"]),
+  nome: z.string().min(3).optional(),
+  email: z.string().email().optional(),
+  role: z.enum(["MASTER", "ADVOGADO"]).optional(),
+  ativo: z.boolean().optional(),
 });
 
 const atualizarPerfilSchema = z.object({
@@ -63,8 +64,7 @@ export async function listarUsuarios(
 ): Promise<void> {
   try {
     const usuarios = await prisma.usuario.findMany({
-      where: { ativo: true },
-      select: { id: true, nome: true, email: true, role: true },
+      select: { id: true, nome: true, email: true, role: true, ativo: true },
     });
     res.json(usuarios);
   } catch (error) {
@@ -78,13 +78,14 @@ export async function obterUsuarioPorId(
 ): Promise<void> {
   try {
     const { id } = req.params;
+
     const usuario = await prisma.usuario.findUnique({
       where: { id: Number(id) },
       select: { id: true, nome: true, email: true, role: true, ativo: true },
     });
 
-    if (!usuario || !usuario.ativo) {
-      res.status(404).json({ erro: "Usuário não encontrado ou inativo." });
+    if (!usuario) {
+      res.status(404).json({ erro: "Usuário não encontrado." });
       return;
     }
 
@@ -242,12 +243,19 @@ export async function atualizarUsuario(
       const novaSenhaHash = await bcrypt.hash(dados.novaSenha, 10);
       await prisma.usuario.update({
         where: { id: req.usuarioId },
-        data: { nome: dados.nome, email: dados.email, senha: novaSenhaHash },
+        data: {
+          nome: dados.nome,
+          email: dados.email,
+          senha: novaSenhaHash,
+        },
       });
     } else {
       await prisma.usuario.update({
         where: { id: req.usuarioId },
-        data: { nome: dados.nome, email: dados.email },
+        data: {
+          nome: dados.nome,
+          email: dados.email,
+        },
       });
     }
 

@@ -11,6 +11,7 @@ interface Usuario {
   nome: string;
   email: string;
   role: string;
+  ativo?: boolean;
 }
 
 const perfilSchema = z
@@ -61,8 +62,14 @@ export default function ConfiguracoesPage() {
         setUsuario(res.data);
         perfilForm.reset({ nome: res.data.nome, email: res.data.email });
         if (res.data.role === "MASTER") carregarUsuarios();
-      } catch (error) {
-        console.error("Erro ao carregar perfil", error);
+      } catch (error: any) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          alert("Sessão expirada ou usuário inativo. Faça login novamente.");
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        } else {
+          console.error("Erro ao carregar perfil", error);
+        }
       }
     }
     carregarPerfil();
@@ -72,8 +79,14 @@ export default function ConfiguracoesPage() {
     try {
       const res = await axios.get("/usuarios");
       setUsuarios(res.data);
-    } catch (error) {
-      console.error("Erro ao carregar usuários", error);
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        alert("Acesso expirado ou não autorizado. Faça login novamente.");
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      } else {
+        console.error("Erro ao carregar usuários", error);
+      }
     }
   }
 
@@ -103,10 +116,35 @@ export default function ConfiguracoesPage() {
   async function alterarRole(id: number, novoRole: string) {
     try {
       await axios.put(`/usuarios/${id}`, { role: novoRole });
-      alert("Role atualizado com sucesso!");
+      alert("Função alterada com sucesso!");
       carregarUsuarios();
     } catch (error) {
-      alert("Erro ao atualizar role");
+      alert("Erro ao atualizar a função");
+      console.error(error);
+    }
+  }
+
+  async function alterarStatus(id: number, novoStatus: boolean) {
+    try {
+      await axios.put(`/usuarios/${id}`, { ativo: novoStatus });
+      alert("Status atualizado com sucesso!");
+      carregarUsuarios();
+    } catch (error) {
+      alert("Erro ao atualizar status");
+      console.error(error);
+    }
+  }
+
+  async function deletarUsuario(id: number) {
+    const confirmacao = confirm("Tem certeza que deseja excluir este usuário?");
+    if (!confirmacao) return;
+
+    try {
+      await axios.delete(`/usuarios/${id}`);
+      alert("Usuário excluído com sucesso!");
+      carregarUsuarios();
+    } catch (error) {
+      alert("Erro ao excluir usuário");
       console.error(error);
     }
   }
@@ -199,35 +237,17 @@ export default function ConfiguracoesPage() {
                     {...cadastroForm.register("nome")}
                     className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                   />
-                  {cadastroForm.formState.errors.nome && (
-                    <p className="text-red-500 text-sm">
-                      {cadastroForm.formState.errors.nome.message}
-                    </p>
-                  )}
-
                   <input
                     placeholder="E-mail"
                     {...cadastroForm.register("email")}
                     className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                   />
-                  {cadastroForm.formState.errors.email && (
-                    <p className="text-red-500 text-sm">
-                      {cadastroForm.formState.errors.email.message}
-                    </p>
-                  )}
-
                   <input
                     type="password"
                     placeholder="Senha"
                     {...cadastroForm.register("senha")}
                     className="w-full p-2 border rounded-lg bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                   />
-                  {cadastroForm.formState.errors.senha && (
-                    <p className="text-red-500 text-sm">
-                      {cadastroForm.formState.errors.senha.message}
-                    </p>
-                  )}
-
                   <button
                     type="submit"
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
@@ -246,8 +266,11 @@ export default function ConfiguracoesPage() {
                     <tr>
                       <th className="text-left p-3">Nome</th>
                       <th className="text-left p-3">E-mail</th>
-                      <th className="text-left p-3">Role</th>
-                      <th className="text-center p-3">Alterar Role</th>
+                      <th className="text-left p-3">Função</th>
+                      <th className="text-left p-3">Status</th>
+                      <th className="text-center p-3">Alterar Função</th>
+                      <th className="text-center p-3">Alterar Status</th>
+                      <th className="text-center p-3">Excluir</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -262,6 +285,9 @@ export default function ConfiguracoesPage() {
                         <td className="p-3 text-gray-600 dark:text-gray-300">
                           {u.role}
                         </td>
+                        <td className="p-3 text-gray-600 dark:text-gray-300">
+                          {u.ativo ? "Ativo" : "Inativo"}
+                        </td>
                         <td className="p-3 text-center">
                           <select
                             value={u.role}
@@ -271,6 +297,26 @@ export default function ConfiguracoesPage() {
                             <option value="MASTER">MASTER</option>
                             <option value="ADVOGADO">ADVOGADO</option>
                           </select>
+                        </td>
+                        <td className="p-3 text-center">
+                          <select
+                            value={u.ativo ? "true" : "false"}
+                            onChange={(e) =>
+                              alterarStatus(u.id, e.target.value === "true")
+                            }
+                            className="p-2 border rounded-md bg-white text-gray-900 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                          >
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
+                          </select>
+                        </td>
+                        <td className="p-3 text-center">
+                          <button
+                            onClick={() => deletarUsuario(u.id)}
+                            className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700"
+                          >
+                            Excluir
+                          </button>
                         </td>
                       </tr>
                     ))}

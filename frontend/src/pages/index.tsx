@@ -2,6 +2,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "@/services/api";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -11,6 +13,9 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [erro, setErro] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -20,12 +25,27 @@ export default function LoginPage() {
   });
 
   async function onSubmit(data: LoginFormData) {
+    setErro("");
     try {
       const response = await axios.post("/login", data);
       localStorage.setItem("token", response.data.token);
-      window.location.href = "/home";
-    } catch (err) {
-      alert("Credenciais inválidas!");
+      router.push("/home");
+    } catch (err: any) {
+      const mensagem =
+        err?.response?.data?.message || err?.response?.data?.erro || "";
+
+      if (mensagem.includes("inativo")) {
+        setErro(
+          "Sua conta está inativa. Entre em contato com o administrador."
+        );
+      } else if (
+        err?.response?.status === 401 ||
+        mensagem.includes("inválidas")
+      ) {
+        setErro("E-mail ou senha incorretos.");
+      } else {
+        setErro("Erro ao tentar fazer login. Tente novamente mais tarde.");
+      }
     }
   }
 
@@ -44,6 +64,8 @@ export default function LoginPage() {
           className="h-28 mx-auto mb-2"
           style={{ maxWidth: "180px" }}
         />
+
+        {erro && <p className="text-red-500 text-sm mb-2">{erro}</p>}
 
         <div className="text-left">
           <label className="block text-sm font-medium text-gray-700 mb-1">
