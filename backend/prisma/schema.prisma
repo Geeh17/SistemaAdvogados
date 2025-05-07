@@ -16,6 +16,7 @@ model Usuario {
   ativo         Boolean        @default(true) 
   clientes      Cliente[]
   compromissos  Compromisso[] 
+  logs          Log[]
 }
 
 
@@ -58,6 +59,18 @@ model Compromisso {
   usuario     Usuario          @relation(fields: [usuarioId], references: [id])
   criadoEm    DateTime         @default(now())
 }
+
+model Log {
+  id           Int      @id @default(autoincrement())
+  acao         String
+  tabela       String
+  registroId   Int
+  usuarioId    Int
+  data         DateTime @default(now())
+
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id])
+}
+
 
 enum TipoCompromisso {
   AUDIENCIA

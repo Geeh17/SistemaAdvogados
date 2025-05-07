@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
+import { logAction } from "../utils/logAction";
 
 const prisma = new PrismaClient();
 
@@ -28,6 +29,13 @@ export const criarCliente = async (
         ...dados,
         usuarioId: req.usuarioId,
       },
+    });
+
+    await logAction({
+      acao: "CREATE",
+      tabela: "Cliente",
+      registroId: cliente.id,
+      usuarioId: req.usuarioId,
     });
 
     res.status(201).json(cliente);
@@ -129,6 +137,13 @@ export const atualizarCliente = async (
       data: dados,
     });
 
+    await logAction({
+      acao: "UPDATE",
+      tabela: "Cliente",
+      registroId: id,
+      usuarioId: req.usuarioId,
+    });
+
     res.json(atualizado);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -167,6 +182,13 @@ export const deletarCliente = async (
     }
 
     await prisma.cliente.delete({ where: { id } });
+
+    await logAction({
+      acao: "DELETE",
+      tabela: "Cliente",
+      registroId: id,
+      usuarioId: req.usuarioId,
+    });
 
     res.json({ mensagem: "Cliente deletado com sucesso" });
   } catch (error) {

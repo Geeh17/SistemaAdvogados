@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma/client";
 import { z } from "zod";
+import { logAction } from "../utils/logAction";
 
 const compromissoSchema = z.object({
   titulo: z.string().min(3, "Título é obrigatório"),
@@ -60,6 +61,13 @@ export const criarCompromisso = async (
       },
     });
 
+    await logAction({
+      acao: "CREATE",
+      tabela: "Compromisso",
+      registroId: compromisso.id,
+      usuarioId,
+    });
+
     res.status(201).json(compromisso);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -78,6 +86,12 @@ export const deletarCompromisso = async (
 ): Promise<void> => {
   try {
     const id = Number(req.params.id);
+    const usuarioId = req.usuarioId;
+
+    if (!usuarioId) {
+      res.status(401).json({ erro: "Usuário não autenticado" });
+      return;
+    }
 
     if (isNaN(id) || id <= 0) {
       res.status(400).json({ erro: "ID inválido" });
@@ -86,6 +100,13 @@ export const deletarCompromisso = async (
 
     await prisma.compromisso.delete({
       where: { id },
+    });
+
+    await logAction({
+      acao: "DELETE",
+      tabela: "Compromisso",
+      registroId: id,
+      usuarioId,
     });
 
     res.status(204).send();

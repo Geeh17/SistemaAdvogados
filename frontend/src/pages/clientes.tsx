@@ -29,13 +29,19 @@ export default function ClientesPage() {
   }
 
   function handleSubmit(data: Omit<Cliente, "id">) {
+    const payload = {
+      ...data,
+      cpf: data.cpf.replace(/\D/g, ""), // remove pontos e traços
+      telefone: data.telefone.replace(/\D/g, ""), // remove parênteses e traços
+    };
+
     if (editingCliente) {
-      axios.put(`/clientes/${editingCliente.id}`, data).then(() => {
+      axios.put(`/clientes/${editingCliente.id}`, payload).then(() => {
         closeModal();
         fetchClientes();
       });
     } else {
-      axios.post("/clientes", data).then(() => {
+      axios.post("/clientes", payload).then(() => {
         closeModal();
         fetchClientes();
       });

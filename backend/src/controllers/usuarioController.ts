@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { logAction } from "../utils/logAction";
 
 const criarUsuarioSchema = z.object({
   nome: z.string().min(3, "Nome é obrigatório"),
@@ -46,6 +47,13 @@ export async function criarUsuario(req: Request, res: Response): Promise<void> {
         role: dados.role,
         ativo: true,
       },
+    });
+
+    await logAction({
+      acao: "CREATE",
+      tabela: "Usuario",
+      registroId: novoUsuario.id,
+      usuarioId: req.usuarioId ?? novoUsuario.id,
     });
 
     res.status(201).json(novoUsuario);
@@ -117,6 +125,13 @@ export async function atualizarUsuarioPorId(
       data: dados,
     });
 
+    await logAction({
+      acao: "UPDATE",
+      tabela: "Usuario",
+      registroId: usuarioAtualizado.id,
+      usuarioId: req.usuarioId!,
+    });
+
     res.json(usuarioAtualizado);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -146,6 +161,13 @@ export async function deletarUsuario(
     }
 
     await prisma.usuario.delete({ where: { id: Number(id) } });
+
+    await logAction({
+      acao: "DELETE",
+      tabela: "Usuario",
+      registroId: Number(id),
+      usuarioId: req.usuarioId!,
+    });
 
     res.json({ mensagem: "Usuário deletado com sucesso." });
   } catch (error) {
@@ -177,6 +199,13 @@ export async function inativarUsuario(
     await prisma.usuario.update({
       where: { id: Number(id) },
       data: { ativo: false },
+    });
+
+    await logAction({
+      acao: "UPDATE",
+      tabela: "Usuario",
+      registroId: Number(id),
+      usuarioId: req.usuarioId!,
     });
 
     res.json({ mensagem: "Usuário inativado com sucesso." });
@@ -258,6 +287,13 @@ export async function atualizarUsuario(
         },
       });
     }
+
+    await logAction({
+      acao: "UPDATE",
+      tabela: "Usuario",
+      registroId: req.usuarioId,
+      usuarioId: req.usuarioId,
+    });
 
     res.json({ mensagem: "Usuário atualizado com sucesso." });
   } catch (error) {

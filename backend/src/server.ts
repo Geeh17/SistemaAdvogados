@@ -10,6 +10,7 @@ import fichaRoutes from "./routes/fichas";
 import dashboardRoutes from "./routes/dashboard";
 import andamentoRoutes from "./routes/andamentos";
 import compromissoRoutes from "./routes/compromissos";
+import logsRouter from "./routes/logs";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/fichas", fichaRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/andamentos", andamentoRoutes);
 app.use("/compromissos", compromissoRoutes);
+app.use("/logs", logsRouter);
 
 app.listen(3000, () => {
   console.log("✅ Servidor rodando na porta 3000");

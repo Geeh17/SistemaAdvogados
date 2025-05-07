@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
+import { logAction } from "../utils/logAction";
 
 const prisma = new PrismaClient();
 
@@ -51,6 +52,13 @@ export const criarFicha = async (
         descricao: dados.descricao,
         clienteId,
       },
+    });
+
+    await logAction({
+      acao: "CREATE",
+      tabela: "Ficha",
+      registroId: ficha.id,
+      usuarioId: req.usuarioId,
     });
 
     res.status(201).json(ficha);

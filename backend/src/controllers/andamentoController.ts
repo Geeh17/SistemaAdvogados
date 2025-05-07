@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma/client";
 import { z } from "zod";
+import { logAction } from "../utils/logAction";
 
 const andamentoSchema = z.object({
   descricao: z
@@ -18,6 +19,13 @@ export const criarAndamento = async (req: Request, res: Response) => {
 
     const andamento = await prisma.andamento.create({
       data: dados,
+    });
+
+    await logAction({
+      acao: "CREATE",
+      tabela: "Andamento",
+      registroId: andamento.id,
+      usuarioId: req.usuarioId!,
     });
 
     res.status(201).json(andamento);
@@ -65,6 +73,13 @@ export const deletarAndamento = async (req: Request, res: Response) => {
 
     await prisma.andamento.delete({
       where: { id },
+    });
+
+    await logAction({
+      acao: "DELETE",
+      tabela: "Andamento",
+      registroId: id,
+      usuarioId: req.usuarioId!,
     });
 
     res.status(204).send();

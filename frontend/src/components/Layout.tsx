@@ -105,13 +105,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             Agenda
           </Link>
           {usuario?.role === "MASTER" && (
-            <Link
-              href="/configuracoes"
-              className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
-            >
-              <Settings className="w-5 h-5" />
-              Cadastro de usuário
-            </Link>
+            <>
+              <Link
+                href="/configuracoes"
+                className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
+              >
+                <Settings className="w-5 h-5" />
+                Cadastro de usuário
+              </Link>
+              <Link
+                href="/logs"
+                className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
+              >
+                <FileText className="w-5 h-5" />
+                Logs de Auditoria
+              </Link>
+            </>
           )}
         </nav>
 
