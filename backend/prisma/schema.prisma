@@ -13,9 +13,11 @@ model Usuario {
   email         String         @unique
   senha         String
   role          Role           @default(ADVOGADO)
+  ativo         Boolean        @default(true) 
   clientes      Cliente[]
   compromissos  Compromisso[] 
 }
+
 
 model Cliente {
   id         Int       @id @default(autoincrement())

@@ -24,14 +24,17 @@ export const autenticar = async (
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "segredo") as JwtPayload;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "segredo"
+    ) as JwtPayload;
 
     const usuario = await prisma.usuario.findUnique({
       where: { id: decoded.id },
     });
 
-    if (!usuario) {
-      res.status(401).json({ erro: "Usuário não encontrado" });
+    if (!usuario || !usuario.ativo) {
+      res.status(401).json({ erro: "Usuário não encontrado ou inativo" });
       return;
     }
 

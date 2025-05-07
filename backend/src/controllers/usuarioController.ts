@@ -43,6 +43,7 @@ export async function criarUsuario(req: Request, res: Response): Promise<void> {
         email: dados.email,
         senha: senhaHash,
         role: dados.role,
+        ativo: true,
       },
     });
 
@@ -62,6 +63,7 @@ export async function listarUsuarios(
 ): Promise<void> {
   try {
     const usuarios = await prisma.usuario.findMany({
+      where: { ativo: true },
       select: { id: true, nome: true, email: true, role: true },
     });
     res.json(usuarios);
@@ -78,11 +80,11 @@ export async function obterUsuarioPorId(
     const { id } = req.params;
     const usuario = await prisma.usuario.findUnique({
       where: { id: Number(id) },
-      select: { id: true, nome: true, email: true, role: true },
+      select: { id: true, nome: true, email: true, role: true, ativo: true },
     });
 
-    if (!usuario) {
-      res.status(404).json({ erro: "Usuário não encontrado." });
+    if (!usuario || !usuario.ativo) {
+      res.status(404).json({ erro: "Usuário não encontrado ou inativo." });
       return;
     }
 
@@ -150,6 +152,40 @@ export async function deletarUsuario(
   }
 }
 
+export async function inativarUsuario(
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!usuario) {
+      res.status(404).json({ erro: "Usuário não encontrado." });
+      return;
+    }
+
+    if (!usuario.ativo) {
+      res.status(400).json({ erro: "Usuário já está inativo." });
+      return;
+    }
+
+    await prisma.usuario.update({
+      where: { id: Number(id) },
+      data: { ativo: false },
+    });
+
+    res.json({ mensagem: "Usuário inativado com sucesso." });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ erro: "Erro ao inativar usuário.", detalhes: error });
+  }
+}
+
 export async function obterUsuario(req: Request, res: Response): Promise<void> {
   try {
     if (!req.usuarioId) {
@@ -159,11 +195,11 @@ export async function obterUsuario(req: Request, res: Response): Promise<void> {
 
     const usuario = await prisma.usuario.findUnique({
       where: { id: req.usuarioId },
-      select: { id: true, nome: true, email: true, role: true },
+      select: { id: true, nome: true, email: true, role: true, ativo: true },
     });
 
-    if (!usuario) {
-      res.status(404).json({ erro: "Usuário não encontrado." });
+    if (!usuario || !usuario.ativo) {
+      res.status(404).json({ erro: "Usuário não encontrado ou inativo." });
       return;
     }
 
@@ -191,8 +227,8 @@ export async function atualizarUsuario(
       where: { id: req.usuarioId },
     });
 
-    if (!usuario) {
-      res.status(404).json({ erro: "Usuário não encontrado." });
+    if (!usuario || !usuario.ativo) {
+      res.status(404).json({ erro: "Usuário não encontrado ou inativo." });
       return;
     }
 

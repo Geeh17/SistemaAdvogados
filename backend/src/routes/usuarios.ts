@@ -7,6 +7,7 @@ import {
   deletarUsuario,
   obterUsuario,
   atualizarUsuario,
+  inativarUsuario,
 } from "../controllers/usuarioController";
 
 import { autenticar } from "../middleware/auth";
@@ -22,5 +23,6 @@ router.get("/", autenticar, authorize("MASTER"), listarUsuarios);
 router.get("/:id", autenticar, authorize("MASTER"), obterUsuarioPorId);
 router.put("/:id", autenticar, authorize("MASTER"), atualizarUsuarioPorId);
 router.delete("/:id", autenticar, authorize("MASTER"), deletarUsuario);
+router.patch("/:id/inativar", autenticar, authorize("MASTER"), inativarUsuario);
 
 export default router;

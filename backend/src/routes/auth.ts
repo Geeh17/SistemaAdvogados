@@ -19,8 +19,10 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
       where: { email },
     });
 
-    if (!usuario) {
-      res.status(401).json({ message: "Credenciais inválidas" });
+    if (!usuario || !usuario.ativo) {
+      res
+        .status(401)
+        .json({ message: "Usuário inativo ou credenciais inválidas" });
       return;
     }
 
