@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "@/services/api";
 import {
-  Home,
   LayoutDashboard,
   Users,
   FileText,
@@ -12,6 +11,8 @@ import {
   CalendarClock,
   Sun,
   Moon,
+  Menu,
+  X,
 } from "lucide-react";
 
 interface Usuario {
@@ -24,6 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
 
   useEffect(() => {
     async function carregarUsuario() {
@@ -34,7 +36,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         console.error("Erro ao carregar usuário", error);
       }
     }
-
     carregarUsuario();
   }, []);
 
@@ -50,13 +51,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen dark:bg-gray-900 dark:text-white">
-      <aside className="w-64 bg-blue-800 dark:bg-gray-800 text-white flex flex-col p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="sm:hidden absolute top-4 left-4 z-50">
+        {!menuAberto && (
+          <button onClick={() => setMenuAberto(true)}>
+            <Menu size={24} />
+          </button>
+        )}
+      </div>
+
+      <aside
+        className={`${
+          menuAberto ? "block" : "hidden"
+        } sm:block w-64 bg-blue-800 dark:bg-gray-800 text-white flex flex-col p-6 fixed sm:static h-full z-40`}
+      >
+        <div className="flex items-center justify-between mb-6 sm:hidden">
+          <button onClick={() => setMenuAberto(false)}>
+            <X size={24} />
+          </button>
+          <button onClick={toggleDarkMode}>
+            {darkMode ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </button>
+        </div>
+
+        <div className="hidden sm:flex items-center justify-between mb-6">
           <button
             onClick={() => router.push("/home")}
             className="text-xl font-bold text-white"
           >
-            <span className="hidden md:inline">📚 Advotech</span>
+            📚 <span className="hidden md:inline">Advotech</span>
           </button>
           <button onClick={toggleDarkMode}>
             {darkMode ? (
@@ -133,7 +159,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </button>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-8 bg-gray-100 dark:bg-gray-900">
+      <main className="flex-1 overflow-y-auto p-4 sm:ml-64 bg-gray-100 dark:bg-gray-900">
         {children}
       </main>
     </div>

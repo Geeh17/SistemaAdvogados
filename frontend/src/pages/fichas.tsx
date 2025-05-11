@@ -85,13 +85,10 @@ export default function FichasPage() {
   async function baixarPdf(fichaId: number) {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `http://localhost:3000/fichas/${fichaId}/pdf`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "blob",
-        }
-      );
+      const response = await axios.get(`/fichas/${fichaId}/pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob",
+      });
 
       const url = window.URL.createObjectURL(
         new Blob([response.data], { type: "application/pdf" })
@@ -140,6 +137,7 @@ export default function FichasPage() {
       : true;
     return correspondeDescricao && correspondeAno && correspondeMes;
   });
+
   return (
     <PrivateRoute>
       <Layout>
@@ -148,6 +146,7 @@ export default function FichasPage() {
             Fichas Jurídicas
           </h1>
 
+          {/* Campo de busca de cliente */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
               Buscar cliente
