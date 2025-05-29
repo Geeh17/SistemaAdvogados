@@ -50,22 +50,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen dark:bg-gray-900 dark:text-white">
-      <div className="sm:hidden absolute top-4 left-4 z-50">
+    <div className="flex min-h-screen relative bg-gray-100 dark:bg-gray-900">
+      <div className="sm:hidden fixed top-4 left-4 z-50">
         {!menuAberto && (
-          <button onClick={() => setMenuAberto(true)}>
-            <Menu size={24} />
+          <button onClick={() => setMenuAberto(true)} aria-label="Abrir menu">
+            <Menu size={24} className="text-white dark:text-gray-200" />
           </button>
         )}
       </div>
 
       <aside
         className={`${
-          menuAberto ? "block" : "hidden"
-        } sm:block w-64 bg-blue-800 dark:bg-gray-800 text-white flex flex-col p-6 fixed sm:static h-full z-40`}
+          menuAberto
+            ? "fixed inset-0 z-50 bg-blue-800 dark:bg-gray-800 p-6"
+            : "hidden"
+        } sm:flex sm:flex-col sm:w-64 sm:p-6 sm:bg-blue-800 dark:sm:bg-gray-800 text-white min-h-screen`}
       >
         <div className="flex items-center justify-between mb-6 sm:hidden">
-          <button onClick={() => setMenuAberto(false)}>
+          <button onClick={() => setMenuAberto(false)} aria-label="Fechar menu">
             <X size={24} />
           </button>
           <button onClick={toggleDarkMode}>
@@ -106,29 +108,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             href="/dashboard"
             className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
           >
-            <LayoutDashboard className="w-5 h-5" />
-            Dashboard
+            <LayoutDashboard className="w-5 h-5" /> Dashboard
           </Link>
           <Link
             href="/clientes"
             className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
           >
-            <Users className="w-5 h-5" />
-            Clientes
+            <Users className="w-5 h-5" /> Clientes
           </Link>
           <Link
             href="/fichas"
             className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
           >
-            <FileText className="w-5 h-5" />
-            Fichas
+            <FileText className="w-5 h-5" /> Fichas
           </Link>
           <Link
             href="/agenda"
             className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
           >
-            <CalendarClock className="w-5 h-5" />
-            Agenda
+            <CalendarClock className="w-5 h-5" /> Agenda
           </Link>
           {usuario?.role === "MASTER" && (
             <>
@@ -136,15 +134,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 href="/configuracoes"
                 className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
               >
-                <Settings className="w-5 h-5" />
-                Cadastro de usuário
+                <Settings className="w-5 h-5" /> Cadastro de usuário
               </Link>
               <Link
                 href="/logs"
                 className="flex items-center gap-2 hover:bg-blue-700 dark:hover:bg-gray-700 p-2 rounded"
               >
-                <FileText className="w-5 h-5" />
-                Logs de Auditoria
+                <FileText className="w-5 h-5" /> Logs de Auditoria
               </Link>
             </>
           )}
@@ -152,14 +148,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         <button
           onClick={handleLogout}
-          className="mt-auto bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-white flex items-center gap-2 justify-center"
+          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-white flex items-center gap-2 justify-center"
         >
-          <LogOut className="w-5 h-5" />
-          Sair
+          <LogOut className="w-5 h-5" /> Sair
         </button>
       </aside>
-
-      <main className="flex-1 overflow-y-auto p-4 sm:ml-64 bg-gray-100 dark:bg-gray-900">
+      <main className="flex-1 w-full overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">
         {children}
       </main>
     </div>

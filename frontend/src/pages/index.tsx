@@ -66,8 +66,8 @@ export default function LoginPage() {
         <img
           src="/logo.png"
           alt="Logo"
-          className="h-28 mx-auto mb-2"
-          style={{ maxWidth: "180px" }}
+          className="h-48 mx-auto mb-4"
+          style={{ maxWidth: "320px" }}
         />
 
         {erro && <p className="text-red-500 text-sm mb-2">{erro}</p>}
